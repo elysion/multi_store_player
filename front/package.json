@@ -1,0 +1,25 @@
+{
+  "name": "multi_store_player_2",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "auto-bind": "^1.2.0",
+    "bp-api": "git+ssh://git@github.com/elysion/bp-api.git",
+    "karet": "^2.0.0",
+    "karet.util": "^0.17.1",
+    "kefir": "^3.8.0",
+    "react": "^16.2.0",
+    "react-clamp": "^1.0.5",
+    "react-dom": "^16.2.0",
+    "react-fontawesome": "^1.6.1",
+    "react-lazyload": "^2.3.0",
+    "react-scripts": "1.0.17",
+    "slideout": "^1.0.1"
+  },
+  "scripts": {
+    "start": "PORT=4001 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
