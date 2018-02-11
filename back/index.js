@@ -215,4 +215,4 @@ app.use((err, req, res, next) => {
   res.send('error')
 })
 
-app.listen(4000);
+app.listen(config.port);
