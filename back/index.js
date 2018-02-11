@@ -12,6 +12,7 @@ const os = require('os')
 const m3u = require('m3u')
 const BPromise = require('bluebird')
 
+const config = require('./config.js')
 const account = require('./db/account.js')
 const removeIgnoredTracksFromUser = require('./remove-ignored-tracks-from-user.js')
 
@@ -48,7 +49,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(cors({ credentials: true, origin: ['http://localhost:4001', `http://${currentIp}:4001`, `http://${currentIp}:5000`]}));
+app.use(cors({ credentials: true, origin: config.allowedOrigins }));
 app.options('*', cors()) // include before other routes
 
 app.get('/logout', function (req, res) {

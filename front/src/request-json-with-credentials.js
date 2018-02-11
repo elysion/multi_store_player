@@ -1,7 +1,7 @@
-const backendHref = `http://${document.location.hostname}:4000`
+import config from './config.js'
 
 const requestJSONwithCredentials = ({url, path, method = 'GET', body}) =>
-  fetch(url ? url : `${backendHref}${path}`, {
+  fetch(url ? url : `${config.apiUrl}${path}`, {
     method,
     body: body ? JSON.stringify(body) : undefined,
     credentials: 'include',
