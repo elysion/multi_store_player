@@ -1,18 +1,18 @@
 const express = require('express');
 const passport = require('passport');
-const Strategy = require('passport-local').Strategy;
+const Strategy = require('passport-local').Strategy
 const session = require('express-session')
-const account = require('./db/account.js')
-const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors')
-const { ensureLoggedIn } = require('connect-ensure-login')
+const pgSession = require('connect-pg-simple')(session)
 const pg = require('./db/pg.js')
 const SQL = require('sql-template-strings')
 const bodyParser = require('body-parser')
 const R = require('ramda')
-const os = require('os');
+const os = require('os')
 const m3u = require('m3u')
 const BPromise = require('bluebird')
+
+const account = require('./db/account.js')
 const removeIgnoredTracksFromUser = require('./remove-ignored-tracks-from-user.js')
 
 const compression = require('compression')
