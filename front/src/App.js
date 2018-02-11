@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import * as R from 'ramda'
 import * as Slideout from 'slideout'
-import autoBind from 'auto-bind'
 
 import Login from './Login.js'
 import Menu from './Menu.js'
@@ -37,8 +36,6 @@ class Player extends Component {
       preloadTracks: null,
       activeSession: null
     }
-
-    autoBind(this)
   }
 
   componentDidMount() {
@@ -238,14 +235,14 @@ class App extends Component {
 
   render() {
     return <div className="root" style={{ height: "100%", overflow: "hidden" }}>
-      <Menu ref="menu" onLoginDone={store => this.updateCarts(store)}></Menu>
+      <Menu ref="menu" onLoginDone={(store => this.updateCarts(store)).bind(this)}></Menu>
       <Player
         onMenuClicked={() => {
           this.state.slideout.toggle()
         }}
         carts={this.state.carts}
-        onAddToCart={store => this.updateCarts(store)}
-        onRemoveFromCart={store => this.updateCarts(store)}
+        onAddToCart={(store => this.updateCarts(store)).bind(this)}
+        onRemoveFromCart={(store => this.updateCarts(store)).bind(this)}
       ></Player>
     </div>
   }
