@@ -118,7 +118,7 @@ class Track extends Component {
 class Tracks extends Component {
   constructor(props) {
     super(props)
-    this.state = { selectedTrack: props.tracks[0].id, currentTrack: -1 }
+    this.state = { selectedTrack: (props.tracks[0] || {}).id, currentTrack: -1 }
   }
 
   renderTracks(tracks, carts) {

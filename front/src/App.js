@@ -33,7 +33,7 @@ class Player extends Component {
     this.state = {
       currentTrack: null,
       tracks: null,
-      preloadTracks: null,
+      preloadTracks: [{}],
       activeSession: null
     }
   }
@@ -180,7 +180,7 @@ class Player extends Component {
                 key={'tracks'}
                 carts={this.props.carts}
                 tracks={this.state.tracks}
-                currentTrack={this.state.preloadTracks[0].id}
+                currentTrack={(this.state.preloadTracks[0] || {}).id}
                 onAddToCart={this.addToCart}
                 onRemoveFromCart={this.removeFromCart}
                 onIgnoreArtistsByLabel={this.ignoreArtistsByLabel}

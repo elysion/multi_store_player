@@ -8,8 +8,8 @@ class Preview extends Component {
     return <div className='preview'>
       <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}><FontAwesome
         name='bars'/></button>
-      <TrackTitle className="preview-title" artists={this.props.preloadTracks[0].artists}
-                  title={this.props.preloadTracks[0].title}/>
+      <TrackTitle className="preview-title" artists={(this.props.preloadTracks[0] || {artists: []}).artists}
+                  title={(this.props.preloadTracks[0] || {}).title}/>
       <div className='player-wrapper'>
         <button className='button button__light button-playback' onClick={() => this.props.onPrevious()}>
           <FontAwesome name='step-backward'/>
