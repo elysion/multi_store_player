@@ -116,6 +116,7 @@ const queryUserTracks = username => pg.queryRowsAsync(
     stores AS (
       SELECT
         ut.track_id,
+        min(store__track_released) as release_date,
         json_agg(
             json_build_object(
                 'name', store_name,
@@ -143,7 +144,8 @@ SELECT
     THEN '[]' :: JSON
   ELSE remixers.remixers END,
   previews.previews,
-  stores.stores
+  stores.stores,
+  stores.release_date
 
 FROM user_tracks ut
   NATURAL JOIN track__label
@@ -152,7 +154,7 @@ FROM user_tracks ut
   NATURAL LEFT JOIN remixers
   NATURAL JOIN previews
   NATURAL JOIN stores
-ORDER BY track_added DESC, ut.track_id
+ORDER BY release_date DESC, ut.track_id
 `)
 
 app.get('/tracks', ensureAuthenticated, ({user: {username}} , res, next) =>
