@@ -70,7 +70,7 @@ class Player extends Component {
 
   setTracks(tracks) {
     const preloadTracks = preloadWindow(0, tracks)
-    this.setState({ preloadTracks, tracks })
+    this.setState({ preloadTracks, tracks: tracks.slice(0, 300) })
     const currentTrack = JSON.parse(localStorage.getItem('currentTrack'))
     this.setCurrentTrack(currentTrack || tracks[0])
   }

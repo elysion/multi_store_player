@@ -154,6 +154,11 @@ FROM user_tracks ut
   NATURAL LEFT JOIN remixers
   NATURAL JOIN previews
   NATURAL JOIN stores
+
+WHERE
+  release_date > (now() - interval '10 days') OR
+    user__track_heard is false
+
 ORDER BY release_date DESC, ut.track_id
 `)
 
