@@ -111,6 +111,13 @@ class Track extends Component {
           by label
         </PillButton>
       </td>
+      <td>
+        <a href={`https://www.youtube.com/results?search_query=${this.props.artists.join('+')}+${this.props.title}`}>
+          <PillButton>
+            YouTube
+          </PillButton>
+        </a>
+      </td>
     </tr>
   }
 }
@@ -171,6 +178,7 @@ class Tracks extends Component {
         <th style={{flex: 2, overflow: 'hidden'}}>Label</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow Artists</th>
+        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>YouTube</th>
       </tr>
       </thead>
       <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>
