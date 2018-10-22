@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS store__label CASCADE;
 DROP TABLE IF EXISTS user__track CASCADE;
 DROP TABLE IF EXISTS track__artist CASCADE;
 DROP TABLE IF EXISTS store__track_preview CASCADE;
+DROP TABLE IF EXISTS user__artist__label_ignore CASCADE;
 
 CREATE TABLE IF NOT EXISTS meta_account (
   meta_account_user_id  SERIAL PRIMARY KEY,
