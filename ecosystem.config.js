@@ -14,7 +14,6 @@ module.exports = {
       wait_ready: true,
       watch: false,
       env: {
-        PORT: 5001
       }
     },
     {
