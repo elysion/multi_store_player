@@ -12,7 +12,7 @@ module.exports = {
       combine_logs: true,
       restart_delay: 4000,
       wait_ready: true,
-      watch: true,
+      watch: false,
       env: {
         PORT: 5001
       }
