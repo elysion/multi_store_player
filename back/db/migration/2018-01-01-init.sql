@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS store__track (
   track_id                   INTEGER REFERENCES track (track_id)   NOT NULL,
   store_id                   INTEGER REFERENCES store (store_id)   NOT NULL,
   store__track_store_id      TEXT UNIQUE                           NOT NULL,
+  store__track_released      DATE,
   store__track_store_details JSONB                                 NOT NULL
 );
 
