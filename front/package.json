@@ -24,5 +24,11 @@
     "eject": "react-scripts eject",
     "start:prod": "npx http-server build -p 4001"
   },
-  "homepage": "."
+  "homepage": ".",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
