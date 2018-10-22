@@ -8,7 +8,6 @@ const pg = require('./db/pg.js')
 const SQL = require('sql-template-strings')
 const bodyParser = require('body-parser')
 const R = require('ramda')
-const os = require('os')
 const m3u = require('m3u')
 const BPromise = require('bluebird')
 
@@ -17,12 +16,6 @@ const account = require('./db/account.js')
 const removeIgnoredTracksFromUser = require('./remove-ignored-tracks-from-user.js')
 
 const compression = require('compression')
-
-const getIPv4AddressOfInterface = interfaceName =>
-  os.networkInterfaces()[interfaceName].find(R.propEq('family', 'IPv4')).address
-
-const currentIp = getIPv4AddressOfInterface('en0')
-console.log('Current IP: ', currentIp)
 
 const checkCredentials = (username, password, done) =>
   account.authenticate(username, password)
