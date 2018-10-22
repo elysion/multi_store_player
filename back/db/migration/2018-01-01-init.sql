@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS user__track (
   user__track_id       SERIAL PRIMARY KEY,
   track_id             INTEGER REFERENCES track (track_id),
   meta_account_user_id INTEGER REFERENCES meta_account (meta_account_user_id),
-  user__track_heard    BOOLEAN DEFAULT FALSE NOT NULL,
+  user__track_heard    timestamptz,
   UNIQUE (track_id, meta_account_user_id)
 );
 

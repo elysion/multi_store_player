@@ -149,8 +149,9 @@ FROM user_tracks ut
   NATURAL JOIN stores
 
 WHERE
-  release_date > (now() - interval '10 days') OR
-    user__track_heard is false
+  release_date > (now() - INTERVAL '10 days') OR
+  user__track_heard IS NULL OR
+  user__track_heard > (now() - INTERVAL '5 days')
 
 ORDER BY release_date DESC, ut.track_id
 `)
@@ -180,7 +181,7 @@ app.post('/tracks/:id', ({params: {id}, body: {heard}}, res, next) => {
   pg.queryRowsAsync(
 SQL`
 UPDATE user__track
-SET user__track_heard = ${heard}
+SET user__track_heard = ${heard ? 'now()' : null}
 WHERE track_id = ${id}
 `).tap(() => res.send())
     .catch(next)
