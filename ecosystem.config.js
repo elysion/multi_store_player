@@ -14,6 +14,7 @@ module.exports = {
       wait_ready: true,
       watch: false,
       env: {
+        BLUEBIRD_DEBUG: 1
       }
     },
     {
