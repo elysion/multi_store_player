@@ -129,3 +129,7 @@ const ensureTracksExist = async (tx, newStoreTracks, bpStoreId) =>
       .tap(track_id => insertTrackToLabel(tx, track_id, newStoreTrack.label.id))
       .tap(track_id => insertStoreTrack(tx, bpStoreId, track_id, newStoreTrack.id, newStoreTrack)
         .tap(([{store__track_id}]) => insertTrackPreview(tx, store__track_id, newStoreTrack.preview))))
+
+module.exports.test = {
+  insertNewTracksToDb
+}
