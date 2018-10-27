@@ -116,6 +116,7 @@ SELECT
   ${labelId}
 FROM meta_account
 where meta_account_username = ${username}
+ON CONFLICT ON CONSTRAINT user__artist__label_ignore_unique DO NOTHING
 `
   )
 
