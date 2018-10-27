@@ -97,16 +97,13 @@ const extractArtistsAndRemixers = R.pipe(
 const ensureArtistsExist = async (tx, newTracks, bpStoreId) =>
   BPromise.resolve(newTracks)
     .then(extractArtistsAndRemixers)
-    .tap(artists => console.log(JSON.stringify({artists}, null, 2)))
     .then(storeArtists =>
       findNewArtists(tx, bpStoreId, storeArtists)
         .then(R.innerJoin(R.eqProps('id'), storeArtists))
-        .tap(newStoreArtists => console.log(JSON.stringify({newStoreArtists}, null, 2)))
         .then(
           newStoreArtists =>
             BPromise.each(newStoreArtists,
               newStoreArtist => {
-                console.log('Adding artist: ', JSON.stringify({newStoreArtist}, null, 2))
 
                 return insertArtist(tx, newStoreArtist.name)
                   .tap(() => insertStoreArtist(tx, bpStoreId, newStoreArtist.name, newStoreArtist.id, JSON.stringify(newStoreArtist)))
