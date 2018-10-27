@@ -87,7 +87,7 @@ router.post('/logout', ({user: {username}}, res) => {
   return res.send('ok')
 })
 
-router.get('/session-valid', ({user: {username}}, res) => {
+router.get('/session-valid', ({user: {username} = {username: undefined}}, res) => {
   return res.send({
     validSession: hasValidSession(username)
   })
