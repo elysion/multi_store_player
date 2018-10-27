@@ -16,8 +16,8 @@ const checkCredentials = (username, password, done) =>
     .then(success => (success ? { username: username } : false))
     .asCallback(done)
 
-const dbMigrate = require('db-migrate').getInstance(true, { config: `${__dirname}/database.json`})
-dbMigrate.up()
+const dbMigrate = require('db-migrate').getInstance(true, { config: `${__dirname}/database.json` })
+;(process.env.RESET_DB_ON_INIT ? dbMigrate.reset() : Promise.resolve()).then(() => dbMigrate.up())
 
 passport.use(new Strategy(checkCredentials))
 
