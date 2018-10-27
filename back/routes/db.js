@@ -118,3 +118,12 @@ FROM meta_account
 where meta_account_username = ${username}
 `
   )
+
+module.exports.setTrackHeard = (trackId, heard) =>
+  pg.queryRowsAsync(
+    SQL`
+UPDATE user__track
+SET user__track_heard = ${heard ? 'now()' : null}
+WHERE track_id = ${trackId}
+`
+  )
