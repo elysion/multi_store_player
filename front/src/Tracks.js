@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import * as R from 'ramda'
 import FontAwesome from 'react-fontawesome'
 import PillButton from './PillButton.js'
+import ExternalLink from './ExternalLink'
 
 class Track extends Component {
   constructor(props) {
@@ -112,11 +113,16 @@ class Track extends Component {
         </PillButton>
       </td>
       <td>
-        <a href={`https://www.youtube.com/results?search_query=${this.props.artists.join('+')}+${this.props.title}`}>
-          <PillButton>
-            YouTube
-          </PillButton>
-        </a>
+        <ExternalLink
+          href={`https://www.youtube.com/results?search_query=${this.props.artists.map(R.prop('name')).join('+')}+${this.props.title}`}>
+          YouTube
+        </ExternalLink>
+      </td>
+      <td>
+        <ExternalLink
+          href={`https://open.spotify.com/search/results/${this.props.artists.map(R.prop('name')).join(' ')} ${this.props.title}`}>
+          Spotify
+        </ExternalLink>
       </td>
     </tr>
   }
@@ -179,6 +185,7 @@ class Tracks extends Component {
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow Artists</th>
         <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>YouTube</th>
+        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>Spotify</th>
       </tr>
       </thead>
       <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>
