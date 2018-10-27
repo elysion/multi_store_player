@@ -15,6 +15,9 @@ const checkCredentials = (username, password, done) =>
     .then(success => success ? { username: username } : false)
     .asCallback(done)
 
+const dbMigrate = require('db-migrate').getInstance(true, { config: `${__dirname}/database.json`})
+dbMigrate.up()
+
 passport.use(new Strategy(checkCredentials));
 
 passport.serializeUser((userToSerialize, done) => done(null, userToSerialize.username))
