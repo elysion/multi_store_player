@@ -14,7 +14,7 @@ CREATE TABLE meta_account (
 );
 
 INSERT INTO meta_account (meta_account_username, meta_account_passwd)
-VALUES ('elysion', crypt('testpwd', gen_salt('bf', 8)));
+VALUES ('testuser', crypt('testpwd', gen_salt('bf', 8)));
 
 
 CREATE TABLE IF NOT EXISTS meta_session (
