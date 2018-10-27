@@ -53,19 +53,21 @@ const getBeatportStoreDbId = () => {
   }
 }
 
+const addTracksToUser = (tx, username, tracks) =>
+  using(pg.getTransaction(), tx =>
+    insertNewTracksToDb(tx, tracks)
+      .then(insertedTrackIds =>
+        BPromise.each(insertedTrackIds,
+          insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
+          .tap(() => removeIgnoredTracksFromUser(tx, username))))
+
 const refreshUserTracks = module.exports.refreshUserTracks = (username, page = 1, endPage = 10) => {
   console.log(`Refreshing tracks from page ${page} of ${username}'s My Beatport`)
   return page >= endPage ? BPromise.resolve() :
     beatportSessions[username]
       .getMyBeatportTracksAsync(page) // TODO: fetch while there were new tracks found
       .then(R.prop('tracks'))
-      .then(tracks =>
-        using(pg.getTransaction(), tx =>
-          insertNewTracksToDb(tx, tracks)
-            .then(insertedTrackIds =>
-              BPromise.each(insertedTrackIds,
-                insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
-                .tap(() => removeIgnoredTracksFromUser(tx, username)))))
+      .then(tracks => BPromise.using(pg.getTransaction(), tx => addTracksToUser(tx, username, tracks)))
       .tap(insertedTracks => console.log(`Inserted ${insertedTracks.length} new tracks to ${username}`))
       .tap(insertedTracks =>
         true || insertedTracks.length > 0 ?
@@ -131,5 +133,6 @@ const ensureTracksExist = async (tx, newStoreTracks, bpStoreId) =>
         .tap(([{store__track_id}]) => insertTrackPreview(tx, store__track_id, newStoreTrack.preview))))
 
 module.exports.test = {
-  insertNewTracksToDb
+  insertNewTracksToDb,
+  addTracksToUser
 }

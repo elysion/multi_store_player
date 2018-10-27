@@ -1,4 +1,5 @@
 const BPromise = require('bluebird')
+const pg = require('../db/pg.js')
 
 const removeIgnoredTracksFromUser = require('../remove-ignored-tracks-from-user.js')
 const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard } = require('./db.js')
@@ -22,6 +23,6 @@ module.exports.addArtistOnLabelToIgnore = addArtistOnLabelToIgnore
 module.exports.addArtistsOnLabelsToIgnore = (username, artistsAndLabels) =>
   BPromise.using(pg.getTransaction(), tx =>
     BPromise.each(artistsAndLabels, ({ artistId, labelId }) =>
-      addArtistOnLabelToIgnore(artistId, labelId, username).tap(() => removeIgnoredTracksFromUser(tx, username))
+      addArtistOnLabelToIgnore(tx, artistId, labelId, username).tap(() => removeIgnoredTracksFromUser(tx, username))
     )
   )

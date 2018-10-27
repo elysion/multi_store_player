@@ -104,7 +104,7 @@ ORDER BY release_date DESC, ut.track_id
 `
   )
 
-module.exports.addArtistOnLabelToIgnore = (artistId, labelId, username) =>
+module.exports.addArtistOnLabelToIgnore = (tx, artistId, labelId, username) =>
   tx.queryAsync(
     // language=PostgreSQL
     SQL`
