@@ -2,12 +2,7 @@ import React, { Component } from 'react'
 import * as R from 'ramda'
 
 class ExternalLink extends Component {
-  getDefaultProps() {
-    return {
-      onClick: () => {}
-    }
-  }
-
+  onClick() {}
   render() {
     return (
       <a
