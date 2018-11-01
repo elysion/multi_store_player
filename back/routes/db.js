@@ -15,7 +15,8 @@ module.exports.queryUserTracks = username =>
         track_id,
         track_title,
         user__track_heard,
-        track_added
+        track_added,
+        track_duration_ms
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
@@ -46,16 +47,35 @@ module.exports.queryUserTracks = username =>
       SELECT
         ut.track_id,
         json_agg(
-            json_build_object('format', store__track_preview_format, 'url', store__track_preview_url)
+          json_build_object(
+            'format', store__track_preview_format, 
+            'url', store__track_preview_url, 
+            'start_ms', store__track_preview_start_ms,
+            'end_ms', store__track_preview_end_ms,
+            'waveform', store__track_preview_waveform_url
+          )
         ) AS previews
       FROM user_tracks ut
         NATURAL JOIN store__track
         NATURAL JOIN store__track_preview
+        NATURAL LEFT JOIN store__track_preview_waveform
       GROUP BY 1
+  ),
+  store_tracks AS (
+      SELECT distinct on (ut.track_id, store_id)
+        track_id, 
+        store_id,
+        store__track_id,
+        store__track_released,
+        store_name,
+        store__track_store_id
+      FROM user_tracks ut
+        NATURAL JOIN store__track
+        NATURAL JOIN store
   ),
     stores AS (
       SELECT
-        ut.track_id,
+        track_id,
         min(store__track_released) as release_date,
         json_agg(
             json_build_object(
@@ -65,16 +85,16 @@ module.exports.queryUserTracks = username =>
                 'trackId', store__track_store_id
             )
         ) AS stores
-      FROM user_tracks ut
-        NATURAL JOIN store__track
-        NATURAL JOIN store
+      FROM store_tracks
       GROUP BY 1
   )
 
 SELECT
+  distinct on (release_date, ut.track_id) -- TODO sort by lowest price
   ut.track_id       AS id,
   track_title       AS title,
   user__track_heard AS heard,
+  track_duration_ms AS duration,
   json_build_object(
       'name', label_name,
       'id', label_id
@@ -83,7 +103,7 @@ SELECT
   CASE WHEN remixers.remixers IS NULL
     THEN '[]' :: JSON
   ELSE remixers.remixers END,
-  previews.previews,
+  previews.previews as previews,
   stores.stores,
   stores.release_date
 
@@ -99,7 +119,6 @@ WHERE
   release_date > (now() - INTERVAL '10 days') OR
   user__track_heard IS NULL OR
   user__track_heard > (now() - INTERVAL '5 days')
-
 ORDER BY release_date DESC, ut.track_id
 `
   )

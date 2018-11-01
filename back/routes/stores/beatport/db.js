@@ -41,16 +41,27 @@ WHERE id :: TEXT NOT IN (
   WHERE store_id = ${bpStoreId}
 )`)
 
-module.exports.insertTrackPreview = (tx, store__track_id, previews) => tx.queryRowsAsync(
+module.exports.insertTrackPreview = (tx, store__track_id, previews, waveforms) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
-INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format)
+INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms)
   SELECT
     ${store__track_id},
     value ->> 'url',
-    key :: PREVIEW_FORMAT
+    key :: PREVIEW_FORMAT,
+    (value -> 'offset' ->> 'start') :: INTEGER,
+    (value -> 'offset' ->> 'end') :: INTEGER
   FROM json_each(${JSON.stringify(previews)} :: JSON) -- todo: JSON -> JSONB?
+  RETURNING store__track_preview_id
 `)
+
+module.exports.insertTrackWaveform =
+  (tx, store__track_id, waveforms) =>
+    tx.queryRowsAsync(
+// language=PostgreSQL
+      SQL`
+INSERT INTO store__track_preview_waveform (store__track_preview_id, store__track_preview_waveform_url) select store__track_preview_id, ${waveforms.large.url} from store__track_preview where store__track_id = ${store__track_id}
+    `)
 
 module.exports.insertStoreTrack = (tx, bpStoreId, trackId, trackStoreId, trackStoreDetails) => tx.queryRowsAsync(
 // language=PostgreSQL
@@ -149,8 +160,8 @@ module.exports.insertNewTrackReturningTrackId = (tx, newStoreTrack) =>
         )
   ),
     inserted_track AS (
-    INSERT INTO track (track_title, track_mix)
-      SELECT ${newStoreTrack.name}, ${newStoreTrack.mix}
+    INSERT INTO track (track_title, track_mix, track_duration_ms)
+      SELECT ${newStoreTrack.name}, ${newStoreTrack.mix}, ${newStoreTrack.duration.milliseconds}
       WHERE NOT exists(SELECT 1
                        FROM existing_track)
     RETURNING track_id

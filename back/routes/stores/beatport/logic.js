@@ -10,6 +10,7 @@ const {
   insertTrackToLabel,
   findNewTracks,
   insertTrackPreview,
+  insertTrackWaveform,
   insertStoreTrack,
   insertNewTrackReturningTrackId,
   ensureStoreLabelExists,
@@ -61,7 +62,7 @@ const addTracksToUser = (tx, username, tracks) =>
           insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
           .tap(() => removeIgnoredTracksFromUser(tx, username))))
 
-const refreshUserTracks = module.exports.refreshUserTracks = (username, page = 1, endPage = 10) => {
+const refreshUserTracks = module.exports.refreshUserTracks = (username, page = 1, endPage = 100) => {
   console.log(`Refreshing tracks from page ${page} of ${username}'s My Beatport`)
   return page >= endPage ? BPromise.resolve() :
     beatportSessions[username]
@@ -130,7 +131,8 @@ const ensureTracksExist = async (tx, newStoreTracks, bpStoreId) =>
       .then(([{track_id}]) => track_id)
       .tap(track_id => insertTrackToLabel(tx, track_id, newStoreTrack.label.id))
       .tap(track_id => insertStoreTrack(tx, bpStoreId, track_id, newStoreTrack.id, newStoreTrack)
-        .tap(([{store__track_id}]) => insertTrackPreview(tx, store__track_id, newStoreTrack.preview))))
+        .tap(([{store__track_id}]) => insertTrackPreview(tx, store__track_id, newStoreTrack.preview))
+        .tap(([{store__track_id}]) => insertTrackWaveform(tx, store__track_id, newStoreTrack.waveform))))
 
 module.exports.test = {
   insertNewTracksToDb,
