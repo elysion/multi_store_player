@@ -54,13 +54,12 @@ class Preview extends Component {
         <button className='button button__light button-playback' onClick={() => this.props.onNext()}>
           <FontAwesome name='step-forward'/>
         </button>
+
         <button className='button button__light button-playback' onClick={() => this.togglePlaying()}>
           <FontAwesome name={this.state.playing ? 'pause' : 'play'}/>
         </button>
         <div className='fluid waveform_container' onClick={e => {
-          debugger
-          console.log((e.clientX - e.target.x), e.clientX, e.clientX / e.currentTarget.clientWidth)
-          this.getPlayer().currentTime = (e.clientX - e.target.x) / e.currentTarget.clientWidth * this.state.totalDuration / 1000
+          this.getPlayer().currentTime = (e.clientX - e.currentTarget.offsetLeft) / e.currentTarget.clientWidth * this.state.totalDuration / 1000
         }
         }>
           <img src={waveform} className='waveform waveform-background'/>
