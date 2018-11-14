@@ -2,6 +2,7 @@
   "name": "multi_store_player_2",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "auto-bind": "^1.2.1",
     "bp-api": "git+ssh://git@github.com/elysion/bp-api.git",
@@ -25,7 +26,6 @@
     "eject": "react-scripts eject",
     "start:prod": "npx http-server build -p 4001"
   },
-  "homepage": ".",
   "browserslist": [
     ">0.2%",
     "not dead",
