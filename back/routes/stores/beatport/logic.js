@@ -62,17 +62,17 @@ const addTracksToUser = (tx, username, tracks) =>
           insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
           .tap(() => removeIgnoredTracksFromUser(tx, username))))
 
-const refreshUserTracks = module.exports.refreshUserTracks = (username, page = 1, endPage = 100) => {
-  console.log(`Refreshing tracks from page ${page} of ${username}'s My Beatport`)
-  return page >= endPage ? BPromise.resolve() :
+const refreshUserTracks = module.exports.refreshUserTracks = (username, firstPage = 1, lastPage = 100) => {
+  console.log(`Refreshing tracks from page ${lastPage} of ${username}'s My Beatport`)
+  return firstPage > lastPage ? BPromise.resolve() :
     beatportSessions[username]
-      .getMyBeatportTracksAsync(page) // TODO: fetch while there were new tracks found
+      .getMyBeatportTracksAsync(lastPage) // TODO: fetch while there were new tracks found
       .then(R.prop('tracks'))
       .then(tracks => BPromise.using(pg.getTransaction(), tx => addTracksToUser(tx, username, tracks)))
       .tap(insertedTracks => console.log(`Inserted ${insertedTracks.length} new tracks to ${username}`))
       .tap(insertedTracks =>
         true || insertedTracks.length > 0 ?
-          refreshUserTracks(username, page + 1, endPage) :
+          refreshUserTracks(username, firstPage, lastPage - 1) :
           BPromise.resolve())
 }
 
