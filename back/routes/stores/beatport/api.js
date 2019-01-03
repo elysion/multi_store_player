@@ -62,16 +62,18 @@ router.get('/downloads', ({user}, res, next) =>
     .catch(next)
 )
 
-router.post('/login', ({body: {username, password}, user}, res, next) => {
+router.post('/login', ({body: {username, password, sessionCookieValue, csrfToken}, user}, res, next) => {
   if (getSession(user.username)) {
     console.log(`using session for user ${user.username}`)
     return res.send('ok')
   } else {
-    return bpApi.initAsync(username, password)
-      .then(session => {
-        // console.log(`storing session for user ${user.username}`)
-        setSession(user.username, session)
-      })
+    (username && password ?
+      bpApi.initAsync(username, password) :
+      bpApi.initWithSessionAsync(sessionCookieValue, csrfToken)
+    ).then(session => {
+      // console.log(`storing session for user ${user.username}`)
+      setSession(user.username, session)
+    })
       .tap(() => res.send('ok'))
       .catch(next)
   }
