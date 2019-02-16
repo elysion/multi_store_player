@@ -4,6 +4,7 @@ import TrackTitle from './TrackTitle.js'
 import FontAwesome from 'react-fontawesome'
 import * as L from 'partial.lenses'
 import {preview} from './Preview.css'
+import browser from 'browser-detect';
 
 const safePropEq = (prop, value) => R.pipe(
   R.defaultTo({}),
@@ -30,6 +31,8 @@ class Preview extends Component {
   }
 
   componentWillUpdate(_, { playing }) {
+    if (browser().name === 'safari') return
+
     if (this.state.playing !== playing) {
       this.getPlayer()[playing ? 'play' : 'pause']()
     }
