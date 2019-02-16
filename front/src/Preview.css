@@ -1,5 +1,6 @@
 .waveform_container {
     position: relative;
+    height: 31px;
 }
 
 .waveform {
