@@ -49,6 +49,13 @@ class Preview extends Component {
     const startOffset = mp3Preview.start_ms
     const endPosition = mp3Preview.end_ms
     const toPositionPercent = currentPosition => (currentPosition + startOffset) / totalDuration * 100
+
+    const clipEdgeOverlayStyle = {
+      height: '100%',
+      background: 'white',
+      opacity: 0.6,
+      position: 'absolute'
+    }
     return <div className='preview'>
       <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}><FontAwesome
         name='bars'/></button>
@@ -74,6 +81,14 @@ class Preview extends Component {
           <div className='waveform waveform-position'
                style={{ WebkitClipPath: `polygon(${toPositionPercent(0)}% 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, ${toPositionPercent(0)}% 100%)`, WebkitMaskImage: `url(${waveform})`
                }}/>
+          <div style={{
+            width: `${toPositionPercent(0)}%`,
+            left: 0,
+            ...clipEdgeOverlayStyle}}/>
+          <div style={{
+            width: `${100 - 100 * endPosition / totalDuration}%`,
+            right: 0,
+            ...clipEdgeOverlayStyle}}/>
         </div>
         {
           this.props.preloadTracks.map(({ id, previews }, i) =>
