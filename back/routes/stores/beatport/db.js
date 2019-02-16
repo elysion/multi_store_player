@@ -66,8 +66,15 @@ INSERT INTO store__track_preview_waveform (store__track_preview_id, store__track
 module.exports.insertStoreTrack = (tx, bpStoreId, trackId, trackStoreId, trackStoreDetails) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
-INSERT INTO store__track (track_id, store_id, store__track_store_id, store__track_store_details)
-VALUES (${trackId}, ${bpStoreId}, ${trackStoreId}, ${JSON.stringify(trackStoreDetails)} :: JSONB)
+INSERT INTO store__track (track_id, store_id, store__track_store_id, store__track_store_details, store__track_published, store__track_released)
+VALUES (
+  ${trackId}, 
+  ${bpStoreId}, 
+  ${trackStoreId}, 
+  ${JSON.stringify(trackStoreDetails)} :: JSONB,
+  ${trackStoreDetails.date.published}, 
+  ${trackStoreDetails.date.released}
+)
 RETURNING store__track_id
 `)
 
