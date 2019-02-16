@@ -72,7 +72,8 @@ class Preview extends Component {
         }}>
           <img src={waveform} className='waveform waveform-background'/>
           <div className='waveform waveform-position'
-               style={{ clipPath: `polygon(${toPositionPercent(0)}% 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, ${toPositionPercent(0)}% 100%)`, WebkitMaskImage: `url(${waveform})`, maskImage: `url(${waveform})` }}/>
+               style={{ WebkitClipPath: `polygon(${toPositionPercent(0)}% 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, ${toPositionPercent(0)}% 100%)`, WebkitMaskImage: `url(${waveform})`
+               }}/>
         </div>
         {
           this.props.preloadTracks.map(({ id, previews }, i) =>
