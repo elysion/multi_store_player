@@ -59,6 +59,7 @@ module.exports.queryUserTracks = username =>
             'url', store__track_preview_url, 
             'start_ms', store__track_preview_start_ms,
             'end_ms', store__track_preview_end_ms,
+            'track_duration_ms', store__track_preview_track_duration_ms,
             'waveform', store__track_preview_waveform_url
           )
         ) AS previews

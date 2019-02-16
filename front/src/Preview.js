@@ -14,7 +14,7 @@ class Preview extends Component {
   constructor(props) {
     super(props)
 
-    this.state = { playing: false, position: 0, totalDuration: R.propOr(0, 'duration', this.props.preloadTracks[0]) }
+    this.state = { playing: false, position: 0 }
   }
 
   setPlaying(playing) {
@@ -40,8 +40,12 @@ class Preview extends Component {
   }
 
   render() {
-    const waveform = L.collect([0, 'previews', L.satisfying(safePropEq('format', 'mp3')), 'waveform', L.defaults('')], this.props.preloadTracks)[0]
-    const toPositionPercent = currentPosition => currentPosition / this.state.totalDuration * 100
+    const mp3Preview = L.collect(['previews', L.satisfying(safePropEq('format', 'mp3'))], this.getCurrentTrack())[0]
+    const waveform = mp3Preview.waveform
+    const totalDuration = mp3Preview.track_duration_ms
+    const startOffset = mp3Preview.start_ms
+    const endPosition = mp3Preview.end_ms
+    const toPositionPercent = currentPosition => (currentPosition + startOffset) / totalDuration * 100
     return <div className='preview'>
       <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}><FontAwesome
         name='bars'/></button>
@@ -59,12 +63,13 @@ class Preview extends Component {
           <FontAwesome name={this.state.playing ? 'pause' : 'play'}/>
         </button>
         <div className='fluid waveform_container' onClick={e => {
-          this.getPlayer().currentTime = (e.clientX - e.currentTarget.offsetLeft) / e.currentTarget.clientWidth * this.state.totalDuration / 1000
-        }
-        }>
+          const trackPositionPercent = (e.clientX - e.currentTarget.offsetLeft) / e.currentTarget.clientWidth
+          const previewPositionInSeconds = (totalDuration * trackPositionPercent - startOffset) / 1000
+          this.getPlayer().currentTime = previewPositionInSeconds
+        }}>
           <img src={waveform} className='waveform waveform-background'/>
           <div className='waveform waveform-position'
-               style={{ clipPath: `polygon(0 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, 0 100%)`, WebkitMaskImage: `url(${waveform})`, maskImage: `url(${waveform})` }}/>
+               style={{ clipPath: `polygon(${toPositionPercent(0)}% 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, ${toPositionPercent(0)}% 100%)`, WebkitMaskImage: `url(${waveform})`, maskImage: `url(${waveform})` }}/>
         </div>
         {
           this.props.preloadTracks.map(({ id, previews }, i) =>
