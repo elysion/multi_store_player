@@ -1,5 +1,6 @@
 const pg = require('../db/pg.js')
 const SQL = require('sql-template-strings')
+const R = require('ramda')
 
 module.exports.queryUserTracks = username =>
   pg.queryRowsAsync(
@@ -20,6 +21,12 @@ module.exports.queryUserTracks = username =>
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
+  ),
+  user_tracks_meta AS (
+    SELECT 
+      COUNT(*) as total,
+      COUNT(*) FILTER (WHERE user__track_heard IS NULL) as new
+    FROM user_tracks
   ),
     authors AS (
       SELECT
@@ -87,8 +94,8 @@ module.exports.queryUserTracks = username =>
         ) AS stores
       FROM store_tracks
       GROUP BY 1
-  )
-
+  ),
+  tracks AS (
 SELECT
   distinct on (release_date, ut.track_id) -- TODO sort by lowest price
   ut.track_id       AS id,
@@ -120,8 +127,21 @@ WHERE
   user__track_heard IS NULL OR
   user__track_heard > (now() - INTERVAL '5 days')
 ORDER BY release_date DESC, ut.track_id
-`
-  )
+  ),
+tracks_list AS (
+select json_agg(tracks) as list
+FROM tracks)
+
+  SELECT
+    list as tracks,
+    json_build_object(
+      'total', total,
+      'new', new
+    ) as meta
+  FROM
+    tracks_list,
+    user_tracks_meta
+`).then(R.head)
 
 module.exports.addArtistOnLabelToIgnore = (tx, artistId, labelId, username) =>
   tx.queryAsync(

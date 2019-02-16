@@ -177,6 +177,9 @@ class Tracks extends Component {
     return <table className="tracks-table" style={{ height: "100%", overflow: "hidden", display: "block" }}>
       <thead style={{ width: "100%", display: "block" }}>
       <tr style={{ width: "100%", display: "flex" }}>
+        <th colSpan={9} style={{flex: 1}}>New tracks: {this.props.newTracks} / {this.props.totalTracks} </th>
+      </tr>
+      <tr style={{ width: "100%", display: "flex" }}>
         <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>New</th>
         <th style={{ flex: 3, overflow: 'hidden' }}>Artist</th>
         <th style={{ flex: 3, overflow: 'hidden' }}>Title</th>

@@ -34,7 +34,9 @@ class Player extends Component {
       currentTrack: null,
       tracks: null,
       preloadTracks: [{}],
-      activeSession: null
+      activeSession: null,
+      newTracks: null,
+      totalTracks: null
     }
   }
 
@@ -68,9 +70,9 @@ class Player extends Component {
     })
   }
 
-  setTracks(tracks) {
+  setTracks({tracks, meta}) {
     const preloadTracks = preloadWindow(0, tracks)
-    this.setState({ preloadTracks, tracks: tracks.slice(0, 300) })
+    this.setState({ preloadTracks, tracks: tracks.slice(0, 500), newTracks: meta.new, totalTracks: meta.total })
     const currentTrack = JSON.parse(localStorage.getItem('currentTrack'))
     this.setCurrentTrack(currentTrack || tracks[0])
   }
@@ -113,7 +115,7 @@ class Player extends Component {
       path: `/tracks`
     })
       .then(getJsonFromResults)
-      .then(tracks => this.setTracks(tracks))
+      .then(data => this.setTracks(data))
   }
 
   addToCart(store, id) {
@@ -180,6 +182,8 @@ class Player extends Component {
                 key={'tracks'}
                 carts={this.props.carts}
                 tracks={this.state.tracks}
+                newTracks={this.state.newTracks}
+                totalTracks={this.state.totalTracks}
                 currentTrack={(this.state.preloadTracks[0] || {}).id}
                 onAddToCart={this.addToCart}
                 onRemoveFromCart={this.removeFromCart}
