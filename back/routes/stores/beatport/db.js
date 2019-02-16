@@ -52,6 +52,7 @@ INSERT INTO store__track_preview (store__track_id, store__track_preview_url, sto
     (value -> 'offset' ->> 'start') :: INTEGER,
     (value -> 'offset' ->> 'end') :: INTEGER
   FROM json_each(${JSON.stringify(previews)} :: JSON) -- todo: JSON -> JSONB?
+  WHERE value ->> 'url' IS NOT NULL
   RETURNING store__track_preview_id
 `)
 
