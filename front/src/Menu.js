@@ -1,7 +1,9 @@
 import React, {Component} from 'react'
 import Login from './Login.js'
+import SessionLogin from './SessionLogin.js'
 import requestJSONwithCredentials from './request-json-with-credentials.js'
 import BPromise from 'bluebird'
+import './Menu.css'
 
 // TODO: merge with App.js
 const getJsonFromResults = results => {
@@ -22,7 +24,7 @@ export default class Menu extends Component {
   }
 
   updateLogins() {
-    return BPromise.each(['beatport'],
+    return BPromise.each(['beatport', 'bandcamp'],
       store =>
         requestJSONwithCredentials({ path: `/stores/${store}/session-valid` })
           .then(getJsonFromResults)
@@ -51,11 +53,12 @@ export default class Menu extends Component {
       <div className={"menu-stores"}>
         <h2>Stores</h2>
         {
-          this.state.loading ?
+          this.state.loading ? // TODO: dead code?
             <div>Loading...</div>
             :
-            <div>
-              Beatport<br/>
+            <ul className={'store-list'}>
+            <li className={"store-list-item"} key={"beatport"}>
+              <h3>Beatport</h3>
               {
                 this.state.validSessions.has('beatport') ?
                   [<button
@@ -94,7 +97,42 @@ export default class Menu extends Component {
                     }}
                   />
               }
-            </div>
+            </li>
+            <li className={"store-list-item"} key={"bandcamp"}>
+              <h3>Bandcamp</h3>
+            {
+              this.state.validSessions.has('bandcamp') ?
+              <button
+                disabled={this.state.loggingOut}
+                className={'button login-button button-push_button-small button-push_button-primary'}
+                onClick={() =>
+                  requestJSONwithCredentials({
+                    path: '/store/bandcamp/logout',
+                    method: 'POST'
+                  })
+                    .then(() => this.updateLogins())}>
+                Logout
+              </button> :
+              <SessionLogin
+                loginPath={"/store/bandcamp/login"}
+                size={"small"}
+                sessionProperties={{
+                  client_id: "Client ID",
+                  identity: "Identity",
+                  session: "Session"
+                }}
+                onLoginDone={() => {
+                  this.setState({ loggedIn: true })
+                  this.updateLogins()
+                  requestJSONwithCredentials({
+                    path: `/store/bandcamp/refresh`,
+                    method: 'POST'
+                  })
+                }}
+              />
+        }
+          </li>
+          </ul>
         }
       </div>
     </div>

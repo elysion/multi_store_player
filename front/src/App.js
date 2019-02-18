@@ -113,7 +113,7 @@ class Player extends Component {
 
   addToCart(store, id) {
     requestJSONwithCredentials({
-      path: `/stores/${store}/carts/cart`,
+      path: `/stores/${store}/carts/default`,
       method: 'POST',
       body: { trackId: id }
     })

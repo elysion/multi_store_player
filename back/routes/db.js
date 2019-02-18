@@ -123,8 +123,8 @@ SELECT
   score
 
 FROM user_tracks ut
-  NATURAL JOIN track__label
-  NATURAL JOIN label
+  NATURAL LEFT JOIN track__label
+  NATURAL LEFT JOIN label
   NATURAL JOIN authors
   NATURAL LEFT JOIN remixers
   NATURAL JOIN previews

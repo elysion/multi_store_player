@@ -49,6 +49,14 @@ router.get('/carts', ({user}, res, next) =>
     .catch(next)
 )
 
+const beatportDefaultCart = 'cart'
+router.post('/carts/default', ({body: {trackId}, user}, res, next) =>
+  getSessionForRequest(user)
+    .addTrackToCartAsync(parseInt(trackId, 10), beatportDefaultCart)
+    .tap(() => res.status(204).send())
+    .catch(next)
+)
+
 router.post('/carts/:cartId', ({body: {trackId}, params: {cartId}, user}, res, next) =>
   getSessionForRequest(user)
     .addTrackToCartAsync(parseInt(trackId, 10), cartId)

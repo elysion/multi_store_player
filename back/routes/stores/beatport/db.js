@@ -41,7 +41,7 @@ WHERE id :: TEXT NOT IN (
   WHERE store_id = ${bpStoreId}
 )`)
 
-module.exports.insertTrackPreview = (tx, store__track_id, previews, waveforms) => tx.queryRowsAsync(
+module.exports.insertTrackPreview = (tx, store__track_id, previews) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
 INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms)
