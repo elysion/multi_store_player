@@ -44,13 +44,14 @@ WHERE id :: TEXT NOT IN (
 module.exports.insertTrackPreview = (tx, store__track_id, previews) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
-INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms)
+INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_track_duration_ms)
   SELECT
     ${store__track_id},
     value ->> 'url',
     key :: PREVIEW_FORMAT,
     (value -> 'offset' ->> 'start') :: INTEGER,
-    (value -> 'offset' ->> 'end') :: INTEGER
+    (value -> 'offset' ->> 'end') :: INTEGER,
+    (value -> 'duration' ->> 'milliseconds') :: INTEGER
   FROM json_each(${JSON.stringify(previews)} :: JSON) -- todo: JSON -> JSONB?
   WHERE value ->> 'url' IS NOT NULL
   RETURNING store__track_preview_id
