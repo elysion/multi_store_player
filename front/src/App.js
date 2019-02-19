@@ -67,8 +67,9 @@ class Player extends Component {
 
   setTracks({tracks, meta}) {
     this.setState({ tracks: tracks.slice(0, 500), newTracks: meta.new, totalTracks: meta.total })
-    const currentTrack = JSON.parse(localStorage.getItem('currentTrack'))
-    this.setCurrentTrack(currentTrack || tracks[0])
+    const storedTrack = JSON.parse(localStorage.getItem('currentTrack'))
+    const currentTrack = storedTrack && tracks.find(R.propEq('track_id', storedTrack.track_id)) || tracks[0]
+    this.setCurrentTrack(currentTrack)
   }
 
   setCurrentTrack(track) {
