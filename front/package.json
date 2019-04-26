@@ -17,7 +17,6 @@
     "react-fontawesome": "^1.6.1",
     "react-lazyload": "^2.3.0",
     "react-scripts": "^2.1.0",
-    "serve": "^6.5.8",
     "slideout": "^1.0.1"
   },
   "scripts": {
