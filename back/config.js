@@ -9,5 +9,5 @@ console.log('Current IP: ', currentIp)
 
 module.exports = {
   allowedOrigins: ['http://localhost:4001', `http://${currentIp}:4001`, 'http://localhost:5001', `http://${currentIp}:5001`],
-  port: 4000
+  port: process.env.PORT || 4000
 }
