@@ -114,6 +114,12 @@ class Track extends Component {
       </td>
       <td>
         <ExternalLink
+          href={`https://www.beatport.com/track/${this.props.title.toLowerCase().replace(' ', '-')}/${this.props.stores.find(R.propEq('code', 'beatport')).trackId}`}>
+          Beatport
+        </ExternalLink>
+      </td>
+      <td>
+        <ExternalLink
           href={`https://www.youtube.com/results?search_query=${this.props.artists.map(R.prop('name')).join('+')}+${this.props.title}`}>
           YouTube
         </ExternalLink>
@@ -187,6 +193,7 @@ class Tracks extends Component {
         <th style={{flex: 2, overflow: 'hidden'}}>Label</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow Artists</th>
+        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>Beatport</th>
         <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>YouTube</th>
         <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>Spotify</th>
       </tr>
