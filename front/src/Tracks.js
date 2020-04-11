@@ -120,7 +120,7 @@ class Track extends Component {
       </td>
       <td>
         <ExternalLink
-          href={`https://open.spotify.com/search/results/${this.props.artists.map(R.prop('name')).join(' ')} ${this.props.title}`}>
+          href={`https://open.spotify.com/search/${this.props.artists.map(R.prop('name')).join(' ')} ${this.props.title}`}>
           Spotify
         </ExternalLink>
       </td>
