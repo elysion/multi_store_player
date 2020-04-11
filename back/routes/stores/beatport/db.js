@@ -69,11 +69,11 @@ module.exports.insertStoreTrack = (tx, bpStoreId, trackId, trackStoreId, trackSt
   SQL`
 INSERT INTO store__track (track_id, store_id, store__track_store_id, store__track_store_details, store__track_published, store__track_released)
 VALUES (
-  ${trackId}, 
-  ${bpStoreId}, 
-  ${trackStoreId}, 
+  ${trackId},
+  ${bpStoreId},
+  ${trackStoreId},
   ${JSON.stringify(trackStoreDetails)} :: JSONB,
-  ${trackStoreDetails.date.published}, 
+  ${trackStoreDetails.date.published},
   ${trackStoreDetails.date.released}
 )
 RETURNING store__track_id
@@ -89,6 +89,20 @@ module.exports.insertTrackToLabel = (tx, trackId, labelId) => tx.queryRowsAsync(
   WHERE store__label_store_id = ${labelId} :: TEXT
   ON CONFLICT DO NOTHING
 `)
+
+module.exports.insertPurchasedTracksByIds = (tx, bpStoreId, username, purchasedTrackIds) =>
+  tx.queryRowsAsync(
+// language=PostgreSQL
+    SQL`
+    INSERT INTO user__store__track_purchased (meta_account_user_id, store__track_id)
+    SELECT meta_account_user_id, store__track_id FROM meta_account, store__track WHERE
+      meta_account_username = ${username} AND
+      store__track_store_id = ANY(${purchasedTrackIds}) AND
+      store_id = ${bpStoreId}
+    ON CONFLICT DO NOTHING
+    RETURNING meta_account_user_id, store__track_id
+    `
+  )
 
 module.exports.insertNewTrackReturningTrackId = (tx, newStoreTrack) =>
   tx.queryRowsAsync(
@@ -240,12 +254,12 @@ module.exports.insertStoreArtist = (tx, bpStoreId, artistName, storeArtistId, st
 // language=PostgreSQL
   SQL`
 INSERT INTO store__artist (artist_id, store_id, store__artist_store_id, store__artist_store_details)
-  SELECT 
+  SELECT
   artist_id,
   ${bpStoreId},
   ${storeArtistId},
   ${storeArtistDetails} :: JSONB
-  FROM artist 
+  FROM artist
   WHERE lower(artist_name) = lower(${artistName})
 `)
 
