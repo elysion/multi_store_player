@@ -58,7 +58,7 @@ export default class Menu extends Component {
               Beatport<br/>
               {
                 this.state.validSessions.has('beatport') ?
-                  <button
+                  [<button
                     disabled={this.state.loggingOut}
                     className={'button login-button button-push_button-small button-push_button-primary'}
                     onClick={() =>
@@ -68,7 +68,18 @@ export default class Menu extends Component {
                       })
                         .then(() => this.updateLogins())}>
                     Logout
-                  </button> :
+                    </button>,
+                    <button
+                    disabled={this.state.loggingOut}
+                    className={'button login-button button-push_button-small button-push_button-primary'}
+                    onClick={() =>
+                      requestJSONwithCredentials({
+                        path: '/store/beatport/refresh',
+                        method: 'POST'
+                      })}>
+                    Refresh
+                    </button>
+                    ] :
                   <Login
                     loginPath={"/store/beatport/login"}
                     size={"small"}
