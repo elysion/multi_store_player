@@ -17,13 +17,19 @@ module.exports.queryUserTracks = username =>
         track_title,
         user__track_heard,
         track_added,
-        track_duration_ms
+        track_duration_ms,
+        COALESCE(SUM(user_label_scores_score) + SUM(user_artist_scores_score), 0) AS score
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
+        NATURAL JOIN track__artist
+        NATURAL JOIN track__label
+        NATURAL LEFT JOIN user_label_scores
+        NATURAL LEFT JOIN user_artist_scores
+      GROUP BY 1, 2, 3, 4, 5
   ),
   user_tracks_meta AS (
-    SELECT 
+    SELECT
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE user__track_heard IS NULL) as new
     FROM user_tracks
@@ -55,8 +61,8 @@ module.exports.queryUserTracks = username =>
         ut.track_id,
         json_agg(
           json_build_object(
-            'format', store__track_preview_format, 
-            'url', store__track_preview_url, 
+            'format', store__track_preview_format,
+            'url', store__track_preview_url,
             'start_ms', store__track_preview_start_ms,
             'end_ms', store__track_preview_end_ms,
             'track_duration_ms', store__track_preview_track_duration_ms,
@@ -71,7 +77,7 @@ module.exports.queryUserTracks = username =>
   ),
   store_tracks AS (
       SELECT distinct on (ut.track_id, store_id)
-        track_id, 
+        track_id,
         store_id,
         store__track_id,
         store__track_released,
@@ -98,7 +104,7 @@ module.exports.queryUserTracks = username =>
   ),
   tracks AS (
 SELECT
-  distinct on (release_date, ut.track_id) -- TODO sort by lowest price
+  distinct on (score, release_date, ut.track_id) -- TODO sort by lowest price
   ut.track_id       AS id,
   track_title       AS title,
   user__track_heard AS heard,
@@ -113,7 +119,8 @@ SELECT
   ELSE remixers.remixers END,
   previews.previews as previews,
   stores.stores,
-  stores.release_date
+  stores.release_date,
+  score
 
 FROM user_tracks ut
   NATURAL JOIN track__label
@@ -127,7 +134,7 @@ WHERE
   release_date > (now() - INTERVAL '10 days') OR
   user__track_heard IS NULL OR
   user__track_heard > (now() - INTERVAL '5 days')
-ORDER BY release_date DESC, ut.track_id
+ORDER BY score DESC, release_date DESC, ut.track_id
   ),
 tracks_list AS (
 select json_agg(tracks) as list
