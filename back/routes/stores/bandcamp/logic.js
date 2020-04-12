@@ -15,7 +15,12 @@ const {
   isNewArtist,
   getStoreId,
   insertTrackToCart,
-  queryTracksInCarts
+  queryTracksInCarts,
+  addAlbumToUser,
+  addTracksToAlbum,
+  queryAlbumUrl,
+  ensureAlbumExists,
+  queryTrackStoreId
 } = require('./db.js')
 
 let sessions = {}
@@ -54,31 +59,35 @@ const getStories = module.exports.getStories = (username, since) =>
   getSession(username)
     .getStoriesAsync(getFanId(username), since)
 
-const getAlbum = module.exports.getAlbum = (username, storyEntry) =>
+const getAlbum = module.exports.getAlbum = (username, itemUrl) =>
   getSession(username)
-    .getAlbumAsync(storyEntry)
+    .getAlbumAsync(itemUrl)
 
-const addTracksFromAlbumsToUser = (tx, username, albums) =>
-  using(pg.getTransaction(), tx =>
-    BPromise.mapSeries(albums, album =>
-      insertNewAlbumTracksToDb(tx, album)
-        .then(insertedTrackIds =>
-          BPromise.each(insertedTrackIds,
-            insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
-            .tap(() => removeIgnoredTracksFromUser(tx, username))))
-      .then(R.flatten)
-  )
+const addTracksFromAlbumToUser = (tx, username, album) =>
+  insertNewAlbumTracksToDb(tx, album)
+    .then(insertedTrackIds =>
+      BPromise.each(insertedTrackIds,
+        insertedTrackId => insertUserTrack(tx, username, insertedTrackId))
+        .tap(() => removeIgnoredTracksFromUser(tx, username)))
 
 const refreshUserTracks = module.exports.refreshUserTracks = (username, since = Date.now(), fetchTimes = 10) => {
   console.log(`Refreshing tracks from ${username}'s Bandcamp`)
   return getStories(username, since)
-    .then(stories => BPromise.mapSeries(stories.entries, story => getAlbum(username, story))
-      .then(albums => BPromise.using(pg.getTransaction(), tx =>
-        addTracksFromAlbumsToUser(tx, username, albums))
-        .then(insertedTracks => ({ insertedTracks, oldestStoryDate: stories.oldest_story_date }))
-        .tap(({ insertedTracks }) => console.log(`Inserted ${insertedTracks.length} new tracks to ${username}. Remaining fetches: ${fetchTimes - 1}.`))
-      )
-    )
+    .then(stories => BPromise.mapSeries(stories.entries, story => getAlbum(username, story.item_url))
+      .then(albums => BPromise.using(pg.getTransaction(), async tx => {
+          const storeId = await getStoreDbId()
+          const insertedTracks = await BPromise.mapSeries(albums, async album => {
+            const albumInDb = await ensureAlbumExists(tx, storeId, album)
+            await addAlbumToUser(tx, username, albumInDb)
+            const insertedTracks = await addTracksFromAlbumToUser(tx, username, album)
+            await addTracksToAlbum(tx, storeId, albumInDb, album.trackinfo.map(R.prop('track_id')))
+            return insertedTracks
+          }).then(R.flatten)
+
+          console.log(`Inserted ${insertedTracks.length} new tracks to ${username}.\
+Remaining fetches: ${fetchTimes - 1}.`)
+          return { insertedTracks, oldestStoryDate: stories.oldest_story_date }
+        })))
     .tap(({oldestStoryDate}) => {
       if (fetchTimes === 1) {
         console.log(`Done refreshing tracks for ${username}.`)
@@ -90,7 +99,7 @@ const refreshUserTracks = module.exports.refreshUserTracks = (username, since = 
       console.error(`Failed to insert tracks for user ${username}`, e)
       return []
     })
-}
+  }
 
 const insertNewAlbumTracksToDb =
   (tx, album) =>
@@ -131,7 +140,15 @@ module.exports.addTrackToCart = (trackId, username, cart = 'default') =>
 
 module.exports.getTracksInCarts = queryTracksInCarts
 
+module.exports.getPreviewUrl = async (username, id, format) => {
+  const storeId = await getStoreDbId()
+  const albumUrl = await queryAlbumUrl(storeId, id)
+  const albumInfo = await getAlbum(username, albumUrl)
+  const trackStoreId = await queryTrackStoreId(id)
+  return await albumInfo.trackinfo.find(R.propEq('track_id', parseInt(trackStoreId, 10))).file['mp3-128']
+}
+
 module.exports.test = {
   insertNewAlbumTracksToDb,
-  addTracksFromAlbumsToUser
+  addTracksFromAlbumToUser
 }

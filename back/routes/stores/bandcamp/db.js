@@ -40,14 +40,15 @@ WHERE track_id NOT IN (
 module.exports.insertTrackPreview = (tx, store__track_id, newStoreTrack) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
-INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_track_duration_ms)
+INSERT INTO store__track_preview
+  (store__track_id, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_track_duration_ms, store__track_preview_url)
   VALUES (
     ${store__track_id},
-    ${newStoreTrack.file['mp3-128']},
     'mp3',
     0,
     ${parseInt(newStoreTrack.duration * 1000, 10)},
-    ${parseInt(newStoreTrack.duration * 1000, 10)}
+    ${parseInt(newStoreTrack.duration * 1000, 10)},
+    ''
   )
   RETURNING store__track_preview_id
 `)
@@ -65,11 +66,11 @@ module.exports.insertStoreTrack = (tx, storeId, trackId, trackStoreId, trackStor
   SQL`
 INSERT INTO store__track (track_id, store_id, store__track_store_id, store__track_store_details, store__track_published, store__track_released)
 VALUES (
-  ${trackId}, 
-  ${storeId}, 
-  ${trackStoreId}, 
+  ${trackId},
+  ${storeId},
+  ${trackStoreId},
   ${JSON.stringify(trackStoreDetails)} :: JSONB,
-  NOW(), -- TODO: How to get release and publish dates on bandcamp? 
+  NOW(), -- TODO: How to get release and publish dates on bandcamp?
   NOW()
 )
 RETURNING store__track_id
@@ -83,7 +84,7 @@ module.exports.insertNewTrackReturningTrackId = (tx, albumInfo, newStoreTrack) =
       SELECT DISTINCT artist_id -- is distinct really needed?
       FROM store__artist
         NATURAL JOIN artist
-        WHERE store__artist_store_id = (${albumInfo.band_id})  
+        WHERE store__artist_store_id = (${albumInfo.band_id})
   ),
     exiting_track_details AS (
       SELECT
@@ -138,12 +139,12 @@ module.exports.insertStoreArtist = (tx, storeId, artistName, storeArtistId, stor
 // language=PostgreSQL
   SQL`
 INSERT INTO store__artist (artist_id, store_id, store__artist_store_id, store__artist_store_details)
-  SELECT 
+  SELECT
   artist_id,
   ${storeId},
   ${storeArtistId},
   ${storeArtistDetails} :: JSONB
-  FROM artist 
+  FROM artist
   WHERE lower(artist_name) = lower(${artistName})
 `)
 
@@ -195,9 +196,63 @@ FROM track
   NATURAL JOIN store__track__cart
   NATURAL JOIN cart
   NATURAL JOIN meta_account
-where 
+where
   meta_account_username = ${username}
-and store_id= ${storeId} 
+and store_id= ${storeId}
   `))
     .then(R.head)
     .then(R.prop('tracks_in_carts'))
+
+module.exports.ensureAlbumExists = async (tx, storeId, storeAlbum) => {
+  let releaseDetails = await tx.queryRowsAsync(SQL`
+    SELECT release_id FROM store__release WHERE store__release_url = ${storeAlbum.url}
+  `)
+  if (releaseDetails.length === 0) {
+    releaseDetails = await tx.queryRowsAsync(SQL`
+      INSERT INTO release (release_name) VALUES (${storeAlbum.current.title})
+      RETURNING release_id
+    `)
+  }
+  await tx.queryRowsAsync(SQL`
+    INSERT INTO store__release (store_id, release_id, store__release_url, store__release_store_id)
+    VALUES (${storeId}, ${releaseDetails[0].release_id}, ${storeAlbum.url}, ${storeAlbum.id})
+    ON CONFLICT DO NOTHING
+  `)
+
+  return releaseDetails[0].release_id
+}
+
+module.exports.addAlbumToUser = (tx, username, albumId) =>
+  tx.queryRowsAsync(SQL`
+    INSERT INTO user__release (meta_account_user_id, release_id)
+      SELECT meta_account_user_id, ${albumId} FROM meta_account
+        WHERE meta_account_username = ${username}
+    ON CONFLICT DO NOTHING
+  `)
+
+module.exports.addTracksToAlbum = (tx, storeId, albumId, storeTrackIds) =>
+  tx.queryRowsAsync(SQL`
+    INSERT INTO release__track (release_id, track_id)
+      SELECT ${albumId}, store__track.track_id
+      FROM store__track
+      WHERE store__track_store_id = ANY(${storeTrackIds}) AND store_id = ${storeId}
+    ON CONFLICT DO NOTHING
+  `)
+
+  module.exports.queryAlbumUrl = (storeId, storeTrackId) =>
+    pg.queryRowsAsync(SQL`
+      SELECT store__release_url
+      FROM store__release
+      NATURAL JOIN release
+      NATURAL JOIN release__track
+      NATURAL JOIN store__track
+      WHERE
+        store__track_id = ${storeTrackId} AND
+        store_id = ${storeId}
+    `).then(([{store__release_url}]) => store__release_url)
+
+module.exports.queryTrackStoreId = (trackId) =>
+  pg.queryRowsAsync(SQL`
+  SELECT store__track_store_id FROM store__track WHERE track_id = ${trackId}
+  `)
+  .then(([{store__track_store_id}]) => store__track_store_id)

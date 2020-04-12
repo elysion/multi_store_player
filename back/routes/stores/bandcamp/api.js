@@ -12,7 +12,8 @@ const {
   deleteSession,
   getTracks,
   addTrackToCart,
-  getTracksInCarts
+  getTracksInCarts,
+  getPreviewUrl
 } = require('./logic.js')
 
 router.use(bodyParser.json())
@@ -22,6 +23,12 @@ router.get('/tracks', ({user, query: {older_than}}, res, next) => {
       .tap(tracks => res.send(tracks))
       .catch(next)
   }
+)
+
+router.get('/tracks/:id/preview.:format', ({ user: { username }, params: { id, format } }, res, next) =>
+  getPreviewUrl(username, id, format)
+    .then(url => res.redirect(url))
+    .catch(next)
 )
 
 router.post('/login', ({body: {client_id, identity, session}, user}, res, next) => {
@@ -37,7 +44,6 @@ router.post('/login', ({body: {client_id, identity, session}, user}, res, next) 
       .tap(session => {
         session.getFanIdAsync()
           .tap(fanId => setFanId(user.username, fanId))
-          .tap(fanId => console.log('fanId', fanId))
       })
       .tap(() => res.send('ok'))
       .catch(next)
@@ -70,7 +76,7 @@ router.get('/session-valid', ({user: {username} = {username: undefined}}, res) =
 
 router.get('/carts', ({user}, res, next) =>
   getTracksInCarts(user)
-    .catch((e) => console.log('asd', e))
+    .catch((e) => console.error('Getting Bandcamp carts failed', e))
     .tap(idsOfItemsInCarts => res.send(idsOfItemsInCarts))
     .catch(next)
 )

@@ -102,19 +102,29 @@ export default class Menu extends Component {
               <h3>Bandcamp</h3>
             {
               this.state.validSessions.has('bandcamp') ?
-              <button
+              [<button
                 disabled={this.state.loggingOut}
-                className={'button login-button button-push_button-small button-push_button-primary'}
+                className={'button menu-item login-button button-push_button-small button-push_button-primary'}
                 onClick={() =>
                   requestJSONwithCredentials({
-                    path: '/store/bandcamp/logout',
+                    path: '/stores/bandcamp/refresh',
                     method: 'POST'
-                  })
-                    .then(() => this.updateLogins())}>
-                Logout
-              </button> :
+                  })}>
+                Refresh
+                </button>,
+                <button
+                  disabled={this.state.loggingOut}
+                  className={'button login-button button-push_button-small button-push_button-primary'}
+                  onClick={() =>
+                    requestJSONwithCredentials({
+                      path: '/stores/bandcamp/logout',
+                      method: 'POST'
+                    })
+                      .then(() => this.updateLogins())}>
+                  Logout
+                  </button>] :
               <SessionLogin
-                loginPath={"/store/bandcamp/login"}
+                loginPath={"/stores/bandcamp/login"}
                 size={"small"}
                 sessionProperties={{
                   client_id: "Client ID",
@@ -125,7 +135,7 @@ export default class Menu extends Component {
                   this.setState({ loggedIn: true })
                   this.updateLogins()
                   requestJSONwithCredentials({
-                    path: `/store/bandcamp/refresh`,
+                    path: `/stores/bandcamp/refresh`,
                     method: 'POST'
                   })
                 }}

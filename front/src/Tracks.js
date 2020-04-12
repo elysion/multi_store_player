@@ -113,10 +113,12 @@ class Track extends Component {
         </PillButton>
       </td>
       <td>
+        { this.props.stores.find(R.propEq('code', 'beatport')) ?
         <ExternalLink
           href={`https://www.beatport.com/track/${this.props.title.toLowerCase().replace(' ', '-')}/${this.props.stores.find(R.propEq('code', 'beatport')).trackId}`}>
           Beatport
-        </ExternalLink>
+        </ExternalLink> : null
+        }
       </td>
       <td>
         <ExternalLink

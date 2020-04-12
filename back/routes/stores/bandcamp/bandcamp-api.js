@@ -20,21 +20,25 @@ const getApi = session => {
     getFanId: callback => session.getJson(`${rootUri}/api/fan/2/collection_summary`, handleErrorOrCallFn(callback, res => callback(null, res.fan_id))),
     getStories: (fan_id, since, callback) => // TODO: get tracks from entries instead from track_list
       session.postForm(`${rootUri}/fan_dash_feed_updates`, {
-        fan_id,
-        older_than: since
-      }, handleErrorOrCallFn(callback, res => callback(null, JSON.parse(res).stories))),
-    getAlbum: (storyEntry, callback) => {
-      return session.get(storyEntry.item_url,
+      fan_id,
+      older_than: since
+    }, handleErrorOrCallFn(callback, res => {
+      return callback(null, JSON.parse(res).stories)
+    })),
+    getAlbum: (itemUrl, callback) => {
+      return session.get(itemUrl,
         handleErrorOrCallFn(callback,
         res => {
           try {
-            return callback(null, getAlbumInfo(res))
+            return callback(null, {...getAlbumInfo(res), url: itemUrl})
           } catch (e) {
-            console.error(`Failed to fetch album info for ${storyEntry.item_url}`, e)
+            console.error(`Failed to fetch album info for ${itemUrl}`, e)
             throw e
           }
         }))
-    }
+    },
+    getPreview: (callback) =>
+      session.get()
   }
 
   return api

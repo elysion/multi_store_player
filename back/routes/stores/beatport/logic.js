@@ -70,7 +70,11 @@ const refreshNewTracks = (username, firstPage, lastPage) =>
     .getMyBeatportTracksAsync(lastPage) // TODO: fetch while there were new tracks found
     .then(R.prop('tracks'))
     .then(tracks => BPromise.using(pg.getTransaction(), tx => addTracksToUser(tx, username, tracks))
-      .catch(e => {console.error('Failed to insert tracks', e); console.error(JSON.stringify(tracks)); return []})
+      .catch(e => {
+        console.error(JSON.stringify(tracks))
+        console.error('Failed to insert tracks (data above)', e)
+        return []
+      })
     )
     .tap(insertedTracks =>
       console.log(`Inserted ${insertedTracks.length} new tracks to ${username} from page ${lastPage}`))
@@ -92,13 +96,13 @@ const refreshDownloadedTracks = (username, firstPage, lastPage) =>
             console.log(
               `Inserted ${insertedNewTracks.length} new tracks to ${username} from downloaded tracks page\
  ${lastPage}`)
-            const insertedPurchasedTracks = 
+            const insertedPurchasedTracks =
               await insertPurchasedTracksByIds(tx, beatportStoreDbId, username, R.pluck('id', tracks))
             console.log(
               `Inserted ${insertedPurchasedTracks.length} downloaded tracks to ${username} from page ${lastPage}`)
           } catch (e) {
-            console.error('Failed to insert tracks', e)
             console.error(JSON.stringify(tracks))
+            console.error('Failed to insert tracks (data above)', e)
             return []
           }
         }

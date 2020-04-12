@@ -1,2 +1,0 @@
-ALTER TABLE store__track_preview ADD COLUMN store__track_preview_track_duration_ms INTEGER;
-UPDATE store__track_preview SET store__track_preview_track_duration_ms = track_duration_ms FROM track NATURAL JOIN store__track WHERE store__track_preview.store__track_id = store__track.store__track_id;
