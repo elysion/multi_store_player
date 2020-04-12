@@ -3,6 +3,7 @@ const BPromise = require('bluebird')
 const using = BPromise.using
 const pg = require('../../../db/pg.js')
 const removeIgnoredTracksFromUser = require('../../../remove-ignored-tracks-from-user.js')
+const { setTrackHeard } = require('../../logic.js')
 
 const {
   insertArtist,

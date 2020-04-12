@@ -167,11 +167,13 @@ ON CONFLICT ON CONSTRAINT user__artist__label_ignore_unique DO NOTHING
 `
   )
 
-module.exports.setTrackHeard = (trackId, heard) =>
+module.exports.setTrackHeard = (trackId, username, heard) =>
   pg.queryRowsAsync(
     SQL`
 UPDATE user__track
 SET user__track_heard = ${heard ? 'now()' : null}
-WHERE track_id = ${trackId}
+WHERE 
+  track_id = ${trackId} AND 
+  meta_account_user_id = (SELECT meta_account_user_id FROM meta_account WHERE meta_account_username = ${username})
 `
   )

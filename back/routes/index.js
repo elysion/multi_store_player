@@ -32,9 +32,9 @@ router.get('/tracks.pls', ensureAuthenticated, ({ user: { username } }, res, nex
     .catch(next)
 )
 
-router.post('/tracks/:id', ({ params: { id }, body: { heard } }, res, next) => {
+router.post('/tracks/:id', ({ user: { username }, params: { id }, body: { heard } }, res, next) => {
   // language=PostgreSQL
-  setTrackHeard(id, heard)
+  setTrackHeard(id, username, heard)
     .tap(() => res.send())
     .catch(next)
 })
