@@ -83,6 +83,7 @@ export default class Menu extends Component {
                   <Login
                     loginPath={"/stores/beatport/login"}
                     size={"small"}
+                    loginName={"beatport"}
                     onLoginDone={() => {
                       this.setState({ loggedIn: true })
                       this.updateLogins()

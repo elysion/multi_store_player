@@ -52,7 +52,8 @@ export default class Login extends Component {
       <div>
         <label className="login-label">
           <span className={`login-label-text login-label-text-${this.props.size}`}>Username</span>
-          <input type="text" name="username"
+          <input type="text" name={`username-${this.props.loginName}`}
+                 autoComplete={`username-${this.props.loginName}`}
                  disabled={this.state.loggingIn}
                  onInput={e => this.setState({ username: e.target.value })}
                  className={`text-input login-input text-input-${this.props.size}`}
@@ -61,7 +62,8 @@ export default class Login extends Component {
 
         <label className="login-label">
           <span className={`login-label-text login-label-text-${this.props.size}`}>Password</span>
-          <input type="password" name="password"
+          <input type="password" name={`password-${this.props.loginName}`}
+                 autoComplete={`password-${this.props.loginName}`}
                  disabled={this.state.loggingIn}
                  onInput={e => this.setState({ password: e.target.value })}
                  className={`text-input login-input text-input-${this.props.size}`}
