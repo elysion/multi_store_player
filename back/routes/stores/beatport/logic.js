@@ -164,7 +164,7 @@ const ensureLabelsExist =
                 .tap(() => ensureStoreLabelExists(tx, bpStoreId, newStoreLabel.name, newStoreLabel.id, JSON.stringify(newStoreLabel))))))
 
 const ensureTracksExist = async (tx, newStoreTracks, bpStoreId) =>
-  BPromise.map(newStoreTracks,
+  BPromise.mapSeries(newStoreTracks,
     newStoreTrack => insertNewTrackReturningTrackId(tx, newStoreTrack)
       .then(([{track_id}]) => track_id)
       .tap(track_id => insertTrackToLabel(tx, track_id, newStoreTrack.label.id))
