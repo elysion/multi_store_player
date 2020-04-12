@@ -70,7 +70,7 @@ const refreshNewTracks = (username, firstPage, lastPage) =>
     .getMyBeatportTracksAsync(lastPage) // TODO: fetch while there were new tracks found
     .then(R.prop('tracks'))
     .then(tracks => BPromise.using(pg.getTransaction(), tx => addTracksToUser(tx, username, tracks))
-      .catch(e => {console.error('Failed to insert tracks', e, console.log(JSON.stringify(tracks, null, 2))); return []})
+      .catch(e => {console.error('Failed to insert tracks', e); console.error(JSON.stringify(tracks)); return []})
     )
     .tap(insertedTracks =>
       console.log(`Inserted ${insertedTracks.length} new tracks to ${username} from page ${lastPage}`))
