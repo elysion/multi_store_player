@@ -45,7 +45,7 @@ app.use(cors({ credentials: true, origin: config.allowedOrigins }))
 app.options('*', cors()) // include before other routes
 
 app.use('/', require('./routes/index.js'))
-app.use('/store', require('./routes/stores/index.js'))
+app.use('/stores', require('./routes/stores/index.js'))
 
 app.use((err, req, res, next) => {
   console.error(err)

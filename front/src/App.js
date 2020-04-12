@@ -120,7 +120,7 @@ class Player extends Component {
 
   addToCart(store, id) {
     requestJSONwithCredentials({
-      path: `/store/${store}/carts/cart`,
+      path: `/stores/${store}/carts/cart`,
       method: 'POST',
       body: { trackId: id }
     })
@@ -130,7 +130,7 @@ class Player extends Component {
 
   removeFromCart(store, id) {
     requestJSONwithCredentials({
-      path: `/store/${store}/carts/cart`,
+      path: `/stores/${store}/carts/cart`,
       method: 'DELETE',
       body: { trackId: id }
     })
@@ -232,7 +232,7 @@ class App extends Component {
   }
 
   updateCarts(store) {
-    return requestJSONwithCredentials({ path: `/store/${store}/carts` })
+    return requestJSONwithCredentials({ path: `/stores/${store}/carts` })
       .then(getJsonFromResults)
       .then(carts => this.setCarts(store, carts))
   }

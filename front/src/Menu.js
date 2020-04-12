@@ -24,7 +24,7 @@ export default class Menu extends Component {
   updateLogins() {
     return BPromise.each(['beatport'],
       store =>
-        requestJSONwithCredentials({ path: `/store/${store}/session-valid` })
+        requestJSONwithCredentials({ path: `/stores/${store}/session-valid` })
           .then(getJsonFromResults)
           .catch(e => ({ validSession: false }))
           .then(({ validSession }) => {
@@ -63,7 +63,7 @@ export default class Menu extends Component {
                     className={'button login-button button-push_button-small button-push_button-primary'}
                     onClick={() =>
                       requestJSONwithCredentials({
-                        path: '/store/beatport/logout',
+                        path: '/stores/beatport/logout',
                         method: 'POST'
                       })
                         .then(() => this.updateLogins())}>
@@ -74,20 +74,20 @@ export default class Menu extends Component {
                     className={'button login-button button-push_button-small button-push_button-primary'}
                     onClick={() =>
                       requestJSONwithCredentials({
-                        path: '/store/beatport/refresh',
+                        path: '/stores/beatport/refresh',
                         method: 'POST'
                       })}>
                     Refresh
                     </button>
                     ] :
                   <Login
-                    loginPath={"/store/beatport/login"}
+                    loginPath={"/stores/beatport/login"}
                     size={"small"}
                     onLoginDone={() => {
                       this.setState({ loggedIn: true })
                       this.updateLogins()
                       requestJSONwithCredentials({
-                        path: `/store/beatport/refresh`,
+                        path: `/stores/beatport/refresh`,
                         method: 'POST'
                       })
                     }}
