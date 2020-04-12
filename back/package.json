@@ -9,7 +9,7 @@
   "dependencies": {
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
-    "bp-api": "git+ssh://git@github.com/elysion/bp-api.git#v2.1.0",
+    "bp-api": "git+ssh://git@github.com/elysion/bp-api.git#v3.0.0",
     "compression": "^1.7.3",
     "connect-ensure-login": "^0.1.1",
     "connect-pg-simple": "^4.2.1",

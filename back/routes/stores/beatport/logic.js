@@ -79,16 +79,29 @@ const refreshNewTracks = (username, firstPage, lastPage) =>
 const refreshDownloadedTracks = (username, firstPage, lastPage) =>
   firstPage > lastPage ? BPromise.resolve() :
     beatportSessions[username]
-      .getDownloadedIdsAsync(lastPage) // TODO: fetch while there were new tracks found
-      .then(ids => BPromise.using(pg.getTransaction(), tx =>
-        getBeatportStoreDbId()
-          .then(beatportStoreDbId => insertPurchasedTracksByIds(tx, beatportStoreDbId, username, ids))
-          .tap(insertedTracks =>
-            console.log(`Inserted ${insertedTracks.length} downloaded tracks to ${username} from page ${lastPage}`))
-          .catch(e => {
-            console.error('Failed to insert tracks', e, console.log(JSON.stringify(tracks, null, 2)))
+      .getDownloadedTracksAsync(lastPage) // TODO: fetch while there were new tracks found
+      .then(R.prop('tracks'))
+      .then(tracks => BPromise.using(pg.getTransaction(), async tx =>
+        {
+          try {
+            const beatportStoreDbId = await getBeatportStoreDbId()
+            const insertedNewTracks = await insertNewTracksToDb(tx, tracks)
+            for (const trackId of insertedNewTracks) {
+              setTrackHeard(trackId, username, true)
+            }
+            console.log(
+              `Inserted ${insertedNewTracks.length} new tracks to ${username} from downloaded tracks page\
+ ${lastPage}`)
+            const insertedPurchasedTracks = 
+              await insertPurchasedTracksByIds(tx, beatportStoreDbId, username, R.pluck('id', tracks))
+            console.log(
+              `Inserted ${insertedPurchasedTracks.length} downloaded tracks to ${username} from page ${lastPage}`)
+          } catch (e) {
+            console.error('Failed to insert tracks', e)
+            console.error(JSON.stringify(tracks))
             return []
-          })
+          }
+        }
       )
       .tap(() => refreshDownloadedTracks(username, firstPage, lastPage - 1))
     )
