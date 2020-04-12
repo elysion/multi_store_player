@@ -74,8 +74,7 @@ const refreshNewTracks = (username, firstPage, lastPage) =>
     )
     .tap(insertedTracks =>
       console.log(`Inserted ${insertedTracks.length} new tracks to ${username} from page ${lastPage}`))
-    .tap(insertedTracks =>
-      refreshNewTracks(username, firstPage, lastPage - 1))
+    .tap(() => refreshNewTracks(username, firstPage, lastPage - 1))
 
 const refreshDownloadedTracks = (username, firstPage, lastPage) =>
   firstPage > lastPage ? BPromise.resolve() :
