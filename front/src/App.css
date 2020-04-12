@@ -260,10 +260,10 @@ audio {
     flex: 1;
 }
 
-.login-label {
+.login-label, .menu-item {
     display: block;
     width: 100%;
-    padding: 6px 0;
+    margin: 6px 0;
 }
 
 .login-label-text-small {
