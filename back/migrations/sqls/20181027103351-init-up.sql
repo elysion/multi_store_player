@@ -76,10 +76,11 @@ CREATE TABLE IF NOT EXISTS store__track (
 );
 
 CREATE TABLE IF NOT EXISTS store__track_preview (
-  store__track_preview_id     SERIAL PRIMARY KEY,
-  store__track_id             INTEGER REFERENCES store__track (store__track_id) NOT NULL,
-  store__track_preview_url    TEXT                                              NOT NULL,
-  store__track_preview_format PREVIEW_FORMAT                                    NOT NULL
+  store__track_preview_id                SERIAL PRIMARY KEY,
+  store__track_id                        INTEGER REFERENCES store__track (store__track_id) NOT NULL,
+  store__track_preview_url               TEXT                                              NOT NULL,
+  store__track_preview_format            PREVIEW_FORMAT                                    NOT NULL,
+  store__track_preview_track_duration_ms INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS store__label (
