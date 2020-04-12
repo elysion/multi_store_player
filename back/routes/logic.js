@@ -2,7 +2,7 @@ const BPromise = require('bluebird')
 const pg = require('../db/pg.js')
 
 const removeIgnoredTracksFromUser = require('../remove-ignored-tracks-from-user.js')
-const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard } = require('./db.js')
+const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard, getLongestPreviewForTrack } = require('./db.js')
 
 module.exports.queryUserTracks = queryUserTracks
 module.exports.getTracksM3u = username =>
@@ -26,3 +26,7 @@ module.exports.addArtistsOnLabelsToIgnore = (username, artistsAndLabels) =>
       addArtistOnLabelToIgnore(tx, artistId, labelId, username).tap(() => removeIgnoredTracksFromUser(tx, username))
     )
   )
+
+module.exports.getStorePreviewRedirectForTrack = (id, format) =>
+  getLongestPreviewForTrack(id, format)
+    .then(({storeCode, storeTrackId}) => `/stores/${storeCode}/tracks/${storeTrackId}/preview.${format}`)

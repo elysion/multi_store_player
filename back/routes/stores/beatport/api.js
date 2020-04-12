@@ -8,7 +8,8 @@ const {
   hasValidSession,
   getSession,
   setSession,
-  deleteSession
+  deleteSession,
+  getPreviewUrl
 } = require('./logic.js')
 
 router.get('/download/:downloadId', (req, res, next) => {
@@ -25,6 +26,12 @@ router.get('/', ({user}, res, next) =>
   getSessionForRequest(user)
     .getMyBeatportAsync()
     .then(results => res.send(results))
+    .catch(next)
+)
+
+router.get('/tracks/:id/preview.:format', ({ params: { id, format } }, res, next) =>
+  getPreviewUrl(id, format)
+    .then(url => res.redirect(url))
     .catch(next)
 )
 

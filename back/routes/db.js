@@ -177,3 +177,17 @@ WHERE
   meta_account_user_id = (SELECT meta_account_user_id FROM meta_account WHERE meta_account_username = ${username})
 `
   )
+
+module.exports.getLongestPreviewForTrack = (id, format) =>
+  pg.queryRowsAsync(
+    SQL`
+    SELECT store__track_id AS "storeTrackId" , lower(store_name) AS "storeCode"
+    FROM 
+      store__track_preview NATURAL JOIN 
+      store__track  NATURAL JOIN 
+      store
+    WHERE track_id = ${id} AND store__track_preview_format = ${format}
+    ORDER BY store__track_preview_track_duration_ms DESC 
+    LIMIT 1;
+    `
+  ).then(R.head)

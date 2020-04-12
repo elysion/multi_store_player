@@ -280,3 +280,11 @@ module.exports.getStoreId = storeName => pg.queryRowsAsync(
   FROM store
   WHERE store_name = ${storeName}`)
   .then(([{ store_id }]) => store_id)
+
+module.exports.queryPreviewUrl = (id, format, bpStoreId) => pg.queryRowsAsync(
+  SQL`
+  SELECT store__track_preview_url 
+  FROM store__track_preview NATURAL JOIN store__track
+  WHERE store__track_id = ${id} AND store__track_preview_format = ${format} AND store_id = ${bpStoreId}
+  `
+).then(([{store__track_preview_url}]) => store__track_preview_url)

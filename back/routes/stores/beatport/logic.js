@@ -20,7 +20,8 @@ const {
   findNewLabels,
   insertStoreArtist,
   findNewArtists,
-  getStoreId
+  getStoreId,
+  queryPreviewUrl
 } = require('./db.js')
 
 let beatportSessions = {}
@@ -92,6 +93,9 @@ const refreshDownloadedTracks = (username, firstPage, lastPage) =>
       )
       .tap(() => refreshDownloadedTracks(username, firstPage, lastPage - 1))
     )
+
+module.exports.getPreviewUrl = (id, format) => getBeatportStoreDbId()
+  .then(bpStoreId => queryPreviewUrl(id, format, bpStoreId))
 
 module.exports.refreshUserTracks = (username, firstPage = 1, lastPage = 100) => {
   console.log(`Refreshing new tracks from page ${lastPage} of ${username}'s My Beatport`)

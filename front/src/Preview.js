@@ -4,7 +4,8 @@ import TrackTitle from './TrackTitle.js'
 import FontAwesome from 'react-fontawesome'
 import * as L from 'partial.lenses'
 import {preview} from './Preview.css'
-import browser from 'browser-detect';
+import browser from 'browser-detect'
+import config from './config'
 
 const safePropEq = (prop, value) => R.pipe(
   R.defaultTo({}),
@@ -38,12 +39,15 @@ class Preview extends Component {
     }
   }
 
-  getCurrentTrack() {
-    return this.props.preloadTracks[0]
-  }
-
   render() {
-    const mp3Preview = L.collect(['previews', L.satisfying(safePropEq('format', 'mp3'))], this.getCurrentTrack())[0]
+    const menu = <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}>
+      <FontAwesome name='bars'/>
+    </button>
+    if (!this.props.currentTrack) {
+      return <div className='preview'>{menu}</div>
+    }
+
+    const mp3Preview = L.collect(['previews', L.satisfying(safePropEq('format', 'mp3'))], this.props.currentTrack)[0]
     const waveform = mp3Preview.waveform
     const totalDuration = mp3Preview.track_duration_ms
     const startOffset = mp3Preview.start_ms
@@ -57,10 +61,9 @@ class Preview extends Component {
       position: 'absolute'
     }
     return <div className='preview'>
-      <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}><FontAwesome
-        name='bars'/></button>
-      <TrackTitle className="preview-title" artists={(this.props.preloadTracks[0] || { artists: [] }).artists}
-                  title={(this.props.preloadTracks[0] || {}).title}/>
+      {menu}
+      <TrackTitle className="preview-title" artists={(this.props.currentTrack || { artists: [] }).artists}
+                  title={(this.props.currentTrack || {}).title}/>
       <div className='player-wrapper'>
         <button className='button button__light button-playback' onClick={() => this.props.onPrevious()}>
           <FontAwesome name='step-backward'/>
@@ -91,21 +94,20 @@ class Preview extends Component {
             ...clipEdgeOverlayStyle}}/>
         </div>
         {
-          this.props.preloadTracks.map(({ id, previews }, i) =>
-            <audio className='fluid' key={id} ref={`player${i}`} autoPlay={i === 0} onEnded={() => {
+          <audio className='fluid' 
+            ref='player0'
+            autoPlay={true}
+            onEnded={() => {
               this.setPlaying(false)
               this.props.onNext()
             }}
-                   onPlaying={() => this.setPlaying(true)}
-                   onPause={() => this.setPlaying(false)}
-                   onTimeUpdate={({ currentTarget: { currentTime } }) => {
-                     // debugger
-                     this.setState({ position: currentTime * 1000 })
-                   }}
-                   controlsList="nodownload">
-              {/*<source src={`${backendHref}/tracks.pls`}/>*/}
-              <source src={previews.find(R.propEq('format', 'mp3')).url}/>
-            </audio>)
+            onPlaying={() => this.setPlaying(true)}
+            onPause={() => this.setPlaying(false)}
+            onTimeUpdate={({ currentTarget: { currentTime } }) => {
+              this.setState({ position: currentTime * 1000 })
+            }}
+            controlsList="nodownload"
+            src={`${config.apiUrl}/tracks/${this.props.currentTrack.id}/preview.mp3`} />
         }
       </div>
     </div>

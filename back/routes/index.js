@@ -6,7 +6,8 @@ const {
   queryUserTracks,
   setTrackHeard,
   getTracksM3u,
-  addArtistsOnLabelsToIgnore
+  addArtistsOnLabelsToIgnore,
+  getStorePreviewRedirectForTrack
 } = require('./logic.js')
 
 router.get('/logout', function(req, res) {
@@ -19,6 +20,12 @@ const ensureAuthenticated = (req, res, next) => {
 
 router.use(bodyParser.json())
 router.post('/login', passport.authenticate('local'), (req, res) => res.status(204).end())
+
+router.get('/tracks/:id/preview.:format', ({ params: {id, format}}, res, next) => 
+  getStorePreviewRedirectForTrack(id, format)
+    .tap(url => res.redirect(url))
+    .catch(next)
+)
 
 router.get('/tracks', ensureAuthenticated, ({ user: { username } }, res, next) =>
   queryUserTracks(username)

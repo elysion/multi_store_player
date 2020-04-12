@@ -11,8 +11,6 @@ import requestJSONwithCredentials from './request-json-with-credentials.js'
 // import injectTapEventPlugin from 'react-tap-event-plugin';
 // injectTapEventPlugin();
 
-const preloadWindowSize = 0
-
 const getJsonFromResults = results => {
   if (results.ok) {
     return results.json()
@@ -24,8 +22,6 @@ const getJsonFromResults = results => {
 const window = R.curry((size, startFrom, list) =>
   list.slice(startFrom, startFrom + size))
 
-const preloadWindow = window(preloadWindowSize + 1)
-
 class Player extends Component {
   constructor(props) {
     super(props)
@@ -33,7 +29,6 @@ class Player extends Component {
     this.state = {
       currentTrack: null,
       tracks: null,
-      preloadTracks: [{}],
       activeSession: null,
       newTracks: null,
       totalTracks: null
@@ -71,16 +66,14 @@ class Player extends Component {
   }
 
   setTracks({tracks, meta}) {
-    const preloadTracks = preloadWindow(0, tracks)
-    this.setState({ preloadTracks, tracks: tracks.slice(0, 500), newTracks: meta.new, totalTracks: meta.total })
+    this.setState({ tracks: tracks.slice(0, 500), newTracks: meta.new, totalTracks: meta.total })
     const currentTrack = JSON.parse(localStorage.getItem('currentTrack'))
     this.setCurrentTrack(currentTrack || tracks[0])
   }
 
   setCurrentTrack(track) {
     localStorage.setItem('currentTrack', JSON.stringify(track))
-    const preloadTracks = preloadWindow(this.getTrackIndex(track), this.state.tracks)
-    this.setState({ currentTrack: track, preloadTracks })
+    this.setState({ currentTrack: track })
     requestJSONwithCredentials({
       path: `/tracks/${track.id}`,
       method: 'POST',
@@ -174,8 +167,8 @@ class Player extends Component {
           this.state.tracks ?
             [<Preview
                 key={'preview'}
+                currentTrack={this.state.currentTrack}
                 onMenuClicked={() => this.props.onMenuClicked()}
-                preloadTracks={this.state.preloadTracks}
                 onPrevious={() => this.playPreviousTrack()}
                 onNext={() => this.playNextTrack()}/>,
               <Tracks
@@ -184,7 +177,7 @@ class Player extends Component {
                 tracks={this.state.tracks}
                 newTracks={this.state.newTracks}
                 totalTracks={this.state.totalTracks}
-                currentTrack={(this.state.preloadTracks[0] || {}).id}
+                currentTrack={(this.state.currentTrack || {}).id}
                 onAddToCart={this.addToCart}
                 onRemoveFromCart={this.removeFromCart}
                 onIgnoreArtistsByLabel={this.ignoreArtistsByLabel}
