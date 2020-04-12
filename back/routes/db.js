@@ -141,7 +141,7 @@ select json_agg(tracks) as list
 FROM tracks)
 
   SELECT
-    list as tracks,
+    CASE WHEN list IS NULL THEN '[]'::JSON ELSE list END as tracks,
     json_build_object(
       'total', total,
       'new', new
