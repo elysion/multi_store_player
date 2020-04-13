@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import * as R from 'ramda'
+import FontAwesome from 'react-fontawesome'
 
 class ExternalLink extends Component {
   onClick() {}
@@ -10,7 +11,8 @@ class ExternalLink extends Component {
         target='_blank'
         {...(R.dissoc('children', this.props))}
       >
-        {this.props.children}
+        {this.props.children}&nbsp;
+        <FontAwesome name="external-link"/>
       </a>
     )
   }

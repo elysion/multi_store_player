@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import Login from './Login.js'
 import SessionLogin from './SessionLogin.js'
+import CookieLogin from './CookieLogin.js'
 import requestJSONwithCredentials from './request-json-with-credentials.js'
 import BPromise from 'bluebird'
 import './Menu.css'
@@ -83,10 +84,14 @@ export default class Menu extends Component {
                     Refresh
                     </button>
                     ] :
-                  <Login
+                  <SessionLogin
                     loginPath={"/stores/beatport/login"}
                     size={"small"}
                     loginName={"beatport"}
+                    sessionProperties={{
+                      csrfToken: 'CSRF Token',
+                      sessionCookieValue: 'Session'
+                    }}
                     onLoginDone={() => {
                       this.setState({ loggedIn: true })
                       this.updateLogins()
@@ -123,14 +128,9 @@ export default class Menu extends Component {
                       .then(() => this.updateLogins())}>
                   Logout
                   </button>] :
-              <SessionLogin
+              <CookieLogin
                 loginPath={"/stores/bandcamp/login"}
                 size={"small"}
-                sessionProperties={{
-                  client_id: "Client ID",
-                  identity: "Identity",
-                  session: "Session"
-                }}
                 onLoginDone={() => {
                   this.setState({ loggedIn: true })
                   this.updateLogins()

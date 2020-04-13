@@ -3,6 +3,7 @@ const BPromise = require('bluebird')
 const using = BPromise.using
 const pg = require('../../../db/pg.js')
 const removeIgnoredTracksFromUser = require('../../../remove-ignored-tracks-from-user.js')
+const { log, error } = require('./logger')
 
 const {
   insertArtist,
@@ -16,7 +17,6 @@ const {
   getStoreId,
   insertTrackToCart,
   queryTracksInCarts,
-  addAlbumToUser,
   addTracksToAlbum,
   queryAlbumUrl,
   ensureAlbumExists,
@@ -71,32 +71,31 @@ const addTracksFromAlbumToUser = (tx, username, album) =>
         .tap(() => removeIgnoredTracksFromUser(tx, username)))
 
 const refreshUserTracks = module.exports.refreshUserTracks = (username, since = Date.now(), fetchTimes = 10) => {
-  console.log(`Refreshing tracks from ${username}'s Bandcamp`)
+  log(`Refreshing tracks from ${username}'s Bandcamp`)
   return getStories(username, since)
     .then(stories => BPromise.mapSeries(stories.entries, story => getAlbum(username, story.item_url))
       .then(albums => BPromise.using(pg.getTransaction(), async tx => {
           const storeId = await getStoreDbId()
           const insertedTracks = await BPromise.mapSeries(albums, async album => {
             const albumInDb = await ensureAlbumExists(tx, storeId, album)
-            await addAlbumToUser(tx, username, albumInDb)
             const insertedTracks = await addTracksFromAlbumToUser(tx, username, album)
             await addTracksToAlbum(tx, storeId, albumInDb, album.trackinfo.map(R.prop('track_id')))
             return insertedTracks
           }).then(R.flatten)
 
-          console.log(`Inserted ${insertedTracks.length} new tracks to ${username}.\
+          log(`Inserted ${insertedTracks.length} new tracks to ${username}.\
 Remaining fetches: ${fetchTimes - 1}.`)
           return { insertedTracks, oldestStoryDate: stories.oldest_story_date }
         })))
     .tap(({oldestStoryDate}) => {
       if (fetchTimes === 1) {
-        console.log(`Done refreshing tracks for ${username}.`)
+        log(`Done refreshing tracks for ${username}.`)
         return BPromise.resolve()
       }
       return refreshUserTracks(username, oldestStoryDate, fetchTimes - 1)
     })
     .catch(e => {
-      console.error(`Failed to insert tracks for user ${username}`, e)
+      error(`Failed to insert tracks for user ${username}`, e)
       return []
     })
   }
@@ -105,18 +104,23 @@ const insertNewAlbumTracksToDb =
   (tx, album) =>
     getStoreDbId()
       .tap(storeId => ensureArtistExist(tx, album, storeId))
-      .then(storeId => findNewTracks(tx, storeId, album.trackinfo.filter(R.propSatisfies(R.complement(R.isNil), ['file']))) // Tracks without previews are of little use
-        .then(R.innerJoin(({ track_id: t1 }, { track_id: t2 }) => t1 == t2, album.trackinfo)) // TODO: do this in db
-        .then(R.uniqBy(R.prop('track_id')))
-        .then(async newTracks => {
-          //await ensureLabelsExist(tx, newTracks, storeId) // TODO: is this even necessary for Bandcamp stuff?
-          return await ensureTracksExist(tx, album.current, newTracks, storeId)
-            .catch(e => {
-              console.error('ensureTracksExist failed for', JSON.stringify(newTracks), e)
-              return BPromise.reject(e)
-            })
-        })
-      )
+      .then(storeId => {
+        const trackinfoWithCleanTitles = album.trackinfo
+          .map(R.evolve({title: title => title.replace(`${album.artist} - `, '') }))
+        // Tracks without previews are of little use
+        return findNewTracks(tx, storeId, trackinfoWithCleanTitles.filter(R.propSatisfies(R.complement(R.isNil), ['file'])))
+          // TODO: do this in db
+          .then(R.innerJoin(({ track_id: t1 }, { track_id: t2 }) => t1 == t2, trackinfoWithCleanTitles))
+          .then(R.uniqBy(R.prop('track_id')))
+          .then(async (newTracks) => {
+            //await ensureLabelsExist(tx, newTracks, storeId) // TODO: is this even necessary for Bandcamp stuff?
+            return await ensureTracksExist(tx, album.current, newTracks, storeId)
+              .catch(e => {
+                error('ensureTracksExist failed for', JSON.stringify(newTracks), e)
+                return BPromise.reject(e)
+              })
+          })
+      })
 
 // TODO: add exclude: {label: [], genre: [] } to store__artist (?)
 // TODO: --> create new artist if excludes match the current track

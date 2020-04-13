@@ -82,10 +82,14 @@ module.exports.queryUserTracks = username =>
         store__track_id,
         store__track_released,
         store_name,
-        store__track_store_id
+        store__track_store_id,
+        store__release_url
       FROM user_tracks ut
         NATURAL JOIN store__track
         NATURAL JOIN store
+        NATURAL LEFT JOIN release__track
+        NATURAL LEFT JOIN release
+        NATURAL LEFT JOIN store__release
   ),
     stores AS (
       SELECT
@@ -96,7 +100,8 @@ module.exports.queryUserTracks = username =>
                 'name', store_name,
                 'code', lower(store_name),
                 'id', store_id,
-                'trackId', store__track_store_id
+                'trackId', store__track_store_id,
+                'url', store__release_url
             )
         ) AS stores
       FROM store_tracks

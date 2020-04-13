@@ -16,9 +16,3 @@ CREATE TABLE release__track (
     track_id INTEGER REFERENCES track(track_id) NOT NULL,
     UNIQUE (release_id, track_id)
 );
-
-CREATE TABLE user__release (
-    release_id INTEGER REFERENCES release(release_id) NOT NULL,
-    meta_account_user_id INTEGER REFERENCES meta_account(meta_account_user_id) NOT NULL,
-    UNIQUE (release_id, meta_account_user_id)
-);

@@ -2,6 +2,7 @@ const BPromise = require('bluebird')
 const R = require('ramda')
 const { initWithSession } = require('request-in-session')
 const saferEval = require('safer-eval')
+const { log, error } = require('./logger')
 const rootUri = 'https://bandcamp.com'
 
 const scrapeJSON = R.curry((startString, stopString, string) => {
@@ -32,13 +33,14 @@ const getApi = session => {
           try {
             return callback(null, {...getAlbumInfo(res), url: itemUrl})
           } catch (e) {
-            console.error(`Failed to fetch album info for ${itemUrl}`, e)
+            error(`Failed to fetch album info for ${itemUrl}`, e)
             throw e
           }
         }))
-    },
-    getPreview: (callback) =>
-      session.get()
+    }
+    // TODO: Move implementation from application logic to here!
+    // getPreview: (callback) =>
+    //   session.get()
   }
 
   return api

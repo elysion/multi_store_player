@@ -4,6 +4,7 @@ const using = BPromise.using
 const pg = require('../../../db/pg.js')
 const removeIgnoredTracksFromUser = require('../../../remove-ignored-tracks-from-user.js')
 const { setTrackHeard } = require('../../logic.js')
+const { log, error } = require('./logger')
 
 const {
   insertArtist,
@@ -71,13 +72,13 @@ const refreshNewTracks = (username, firstPage, lastPage) =>
     .then(R.prop('tracks'))
     .then(tracks => BPromise.using(pg.getTransaction(), tx => addTracksToUser(tx, username, tracks))
       .catch(e => {
-        console.error(JSON.stringify(tracks))
-        console.error('Failed to insert tracks (data above)', e)
+        error(JSON.stringify(tracks))
+        error('Failed to insert tracks (data above)', e)
         return []
       })
     )
     .tap(insertedTracks =>
-      console.log(`Inserted ${insertedTracks.length} new tracks to ${username} from page ${lastPage}`))
+      log(`Inserted ${insertedTracks.length} new tracks to ${username} from page ${lastPage}`))
     .tap(() => refreshNewTracks(username, firstPage, lastPage - 1))
 
 const refreshDownloadedTracks = (username, firstPage, lastPage) =>
@@ -93,16 +94,16 @@ const refreshDownloadedTracks = (username, firstPage, lastPage) =>
             for (const trackId of insertedNewTracks) {
               setTrackHeard(trackId, username, true)
             }
-            console.log(
+            log(
               `Inserted ${insertedNewTracks.length} new tracks to ${username} from downloaded tracks page\
  ${lastPage}`)
             const insertedPurchasedTracks =
               await insertPurchasedTracksByIds(tx, beatportStoreDbId, username, R.pluck('id', tracks))
-            console.log(
+            log(
               `Inserted ${insertedPurchasedTracks.length} downloaded tracks to ${username} from page ${lastPage}`)
           } catch (e) {
-            console.error(JSON.stringify(tracks))
-            console.error('Failed to insert tracks (data above)', e)
+            error(JSON.stringify(tracks))
+            error('Failed to insert tracks (data above)', e)
             return []
           }
         }
@@ -114,7 +115,7 @@ module.exports.getPreviewUrl = (id, format) => getBeatportStoreDbId()
   .then(bpStoreId => queryPreviewUrl(id, format, bpStoreId))
 
 module.exports.refreshUserTracks = (username, firstPage = 1, lastPage = 100) => {
-  console.log(`Refreshing new tracks from page ${lastPage} of ${username}'s My Beatport`)
+  log(`Refreshing new tracks from page ${lastPage} of ${username}'s My Beatport`)
   return BPromise.all([refreshNewTracks(username, firstPage, lastPage), refreshDownloadedTracks(username, firstPage, lastPage)])
 }
 
@@ -148,11 +149,8 @@ const ensureArtistsExist = async (tx, newTracks, bpStoreId) =>
         .then(
           newStoreArtists =>
             BPromise.each(newStoreArtists,
-              newStoreArtist => {
-
-                return insertArtist(tx, newStoreArtist.name)
-                  .tap(() => insertStoreArtist(tx, bpStoreId, newStoreArtist.name, newStoreArtist.id, JSON.stringify(newStoreArtist)))
-              })))
+              newStoreArtist => insertArtist(tx, newStoreArtist.name)
+                .tap(() => insertStoreArtist(tx, bpStoreId, newStoreArtist.name, newStoreArtist.id, JSON.stringify(newStoreArtist))))))
 
 const ensureLabelsExist =
   async (tx, newStoreTracks, bpStoreId) =>

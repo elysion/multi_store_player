@@ -226,9 +226,9 @@ class App extends Component {
   }
 
   updateCarts(store) {
-    return requestJSONwithCredentials({ path: `/stores/${store}/carts` })
-      .then(getJsonFromResults)
-      .then(carts => this.setCarts(store, carts))
+    // return requestJSONwithCredentials({ path: `/stores/${store}/carts` })
+    //   .then(getJsonFromResults)
+    //   .then(carts => this.setCarts(store, carts))
   }
 
   render() {

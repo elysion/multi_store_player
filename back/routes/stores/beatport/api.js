@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const bodyParser = require('body-parser')
 const bpApi = require('bp-api')
+const { log, error } = require('./logger')
 
 const {
   getSessionForRequest,
@@ -77,16 +78,16 @@ router.get('/downloads', ({user}, res, next) =>
     .catch(next)
 )
 
-router.post('/login', ({body: {username, password, sessionCookieValue, csrfToken}, user}, res, next) => {
+router.post('/login', ({body: {username, password, sessionCookieValue, csrfToken, cookie}, user}, res, next) => {
   if (getSession(user.username)) {
-    console.log(`using session for user ${user.username}`)
+    log(`Using session for user ${user.username}`)
     return res.send('ok')
   } else {
     (username && password ?
       bpApi.initAsync(username, password) :
       bpApi.initWithSessionAsync(sessionCookieValue, csrfToken)
     ).then(session => {
-      // console.log(`storing session for user ${user.username}`)
+      log(`Storing session for user ${user.username}`)
       setSession(user.username, session)
     })
       .tap(() => res.send('ok'))

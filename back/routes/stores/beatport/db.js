@@ -6,12 +6,8 @@ module.exports.insertArtist = (tx, artistName) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`-- insert new artists
 INSERT INTO artist (artist_name)
-  SELECT ${artistName}
-  WHERE NOT EXISTS (
-    SELECT 1
-    FROM artist
-    WHERE lower(artist_name) = lower(${artistName})
-  )`)
+  VALUES (${artistName})
+  ON CONFLICT DO NOTHING`)
 
 module.exports.insertUserTrack = (tx, username, insertedTrackId) =>
   tx.queryRowsAsync(
@@ -126,13 +122,13 @@ module.exports.insertNewTrackReturningTrackId = (tx, newStoreTrack) =>
     authors AS (
       SELECT DISTINCT artist_id -- is distinct really needed?
       FROM new_track_authors
-        JOIN store__artist ON (store__artist_store_id :: INT = new_track_authors.id)
+        JOIN store__artist ON (store__artist_store_id = new_track_authors.id :: TEXT)
         NATURAL JOIN artist
   ),
     remixers AS (
       SELECT DISTINCT artist_id -- is distinct really needed?
       FROM new_track_remixers
-        JOIN store__artist ON (store__artist_store_id :: INT = new_track_remixers.id)
+        JOIN store__artist ON (store__artist_store_id = new_track_remixers.id :: TEXT)
         NATURAL JOIN artist
   ),
     exiting_track_details AS (
@@ -262,6 +258,7 @@ INSERT INTO store__artist (artist_id, store_id, store__artist_store_id, store__a
   ${storeArtistDetails} :: JSONB
   FROM artist
   WHERE lower(artist_name) = lower(${artistName})
+  ON CONFLICT DO NOTHING
 `)
 
 module.exports.findNewArtists = (tx, bpStoreId, storeArtists) => tx.queryRowsAsync(
@@ -284,7 +281,7 @@ module.exports.getStoreId = storeName => pg.queryRowsAsync(
 
 module.exports.queryPreviewUrl = (id, format, bpStoreId) => pg.queryRowsAsync(
   SQL`
-  SELECT store__track_preview_url 
+  SELECT store__track_preview_url
   FROM store__track_preview NATURAL JOIN store__track
   WHERE store__track_id = ${id} AND store__track_preview_format = ${format} AND store_id = ${bpStoreId}
   `

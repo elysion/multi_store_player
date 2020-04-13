@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const bodyParser = require('body-parser')
 const { initWithSessionAsync } = require('./bandcamp-api.js')
+const R = require('ramda')
+const { log, error } = require('./logger')
 
 const {
   refreshUserTracks,
@@ -31,14 +33,21 @@ router.get('/tracks/:id/preview.:format', ({ user: { username }, params: { id, f
     .catch(next)
 )
 
-router.post('/login', ({body: {client_id, identity, session}, user}, res, next) => {
+const loginWithCookie = cookie => {
+  cookieObject = R.fromPairs(cookie.split('; ').map(x => x.split('=')))
+  return initWithSessionAsync(cookieObject)
+}
+
+router.post('/login', ({body: {client_id, identity, session, cookie}, user}, res, next) => {
   if (getSession(user.username)) {
-    console.log(`using session for user ${user.username}`)
+    log(`using session for user ${user.username}`)
     return res.send('ok')
   } else {
-    initWithSessionAsync({client_id, identity, session})
+    return (cookie ?
+      loginWithCookie(cookie) :
+      initWithSessionAsync({client_id, identity, session}))
       .tap(session => {
-        // console.log(`storing session for user ${user.username}`)
+        log(`Bandcamp: Storing session for user ${user.username}`)
         setSession(user.username, session)
       })
       .tap(session => {
@@ -53,7 +62,7 @@ router.post('/login', ({body: {client_id, identity, session}, user}, res, next) 
 router.post('/refresh', ({user}, res) => {
   res.send('ok')
   return refreshUserTracks(user.username)
-    .catch(err => console.error(`Refresh of Bandcamp tracks for user ${user.username} failed`, err))
+    .catch(err => error(`Refresh tracks for user ${user.username} failed`, err))
   }
 )
 
@@ -76,7 +85,7 @@ router.get('/session-valid', ({user: {username} = {username: undefined}}, res) =
 
 router.get('/carts', ({user}, res, next) =>
   getTracksInCarts(user)
-    .catch((e) => console.error('Getting Bandcamp carts failed', e))
+    .catch((e) => error('Getting carts failed', e))
     .tap(idsOfItemsInCarts => res.send(idsOfItemsInCarts))
     .catch(next)
 )

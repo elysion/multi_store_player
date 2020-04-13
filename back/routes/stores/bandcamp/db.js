@@ -222,14 +222,6 @@ module.exports.ensureAlbumExists = async (tx, storeId, storeAlbum) => {
   return releaseDetails[0].release_id
 }
 
-module.exports.addAlbumToUser = (tx, username, albumId) =>
-  tx.queryRowsAsync(SQL`
-    INSERT INTO user__release (meta_account_user_id, release_id)
-      SELECT meta_account_user_id, ${albumId} FROM meta_account
-        WHERE meta_account_username = ${username}
-    ON CONFLICT DO NOTHING
-  `)
-
 module.exports.addTracksToAlbum = (tx, storeId, albumId, storeTrackIds) =>
   tx.queryRowsAsync(SQL`
     INSERT INTO release__track (release_id, track_id)
@@ -253,6 +245,6 @@ module.exports.addTracksToAlbum = (tx, storeId, albumId, storeTrackIds) =>
 
 module.exports.queryTrackStoreId = (trackId) =>
   pg.queryRowsAsync(SQL`
-  SELECT store__track_store_id FROM store__track WHERE track_id = ${trackId}
+  SELECT store__track_store_id FROM store__track WHERE store__track_id = ${trackId}
   `)
   .then(([{store__track_store_id}]) => store__track_store_id)
