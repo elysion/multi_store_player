@@ -4,6 +4,7 @@ import CookieLogin from './CookieLogin.js'
 import RefreshButton from './RefreshButton'
 import { requestJSONwithCredentials, requestWithCredentials } from './request-json-with-credentials.js'
 import BPromise from 'bluebird'
+import GitHubButton from 'react-github-btn'
 import './Menu.css'
 
 export default class Menu extends Component {
@@ -60,6 +61,20 @@ export default class Menu extends Component {
           onClick={this.logout}>
           Logout
         </button>
+        <GitHubButton
+          href="https://github.com/elysion/multi_store_player/"
+          data-icon="octicon-mark-githubocticon-issue-opened"
+          data-size="large"
+          aria-label="View elysion/multi_store_player on GitHub">
+            View on GitHub
+        </GitHubButton><br/>
+        <GitHubButton
+          href="https://github.com/elysion/multi_store_player/issues"
+          data-icon="octicon-issue-opened"
+          data-size="large"
+          aria-label="Issue elysion/multi_store_player on GitHub">
+            Create an issue
+        </GitHubButton>
         <h2>Stores</h2>
         {
           <ul className={'store-list'}>
