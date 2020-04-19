@@ -21,6 +21,7 @@ class App extends Component {
       slideout: null,
       carts: {},
       loggedIn: false,
+      loading: true,
       tracksData: defaultTracksData
     }
   }
@@ -33,6 +34,8 @@ class App extends Component {
       console.error(e)
       this.setState({ loggedIn: false })
     }
+
+    this.setState({ loading: false })
   }
 
   setCarts(store, carts) {
@@ -75,47 +78,48 @@ class App extends Component {
 
   render() {
     return <div className="root" style={{ height: "100%", overflow: "hidden" }}>
-      {this.state.loggedIn ?
-        <>
-          <Menu ref="menu"
-            loggedIn={this.state.loggedIn}
-            onLogoutDone={this.onLogoutDone.bind(this)}
-            onStoreLoginDone={() => { }} //this.onStoreLoginDone.bind(this)}
-            onUpdateTracks={this.updateTracks.bind(this)}
-          ></Menu>
-          <SlideoutPanel
-            ref="slideout"
-            onOpen={this.updateLogins.bind(this)}
-          >
-            <Player
-              onMenuClicked={() => {
-                this.refs['slideout'].toggle()
-              }}
-              carts={this.state.carts}
-              tracks={this.state.tracksData.tracks}
-              newTracks={this.state.tracksData.meta.newTracks}
-              totalTracks={this.state.tracksData.meta.totalTracks}
-              onAddToCart={(store => this.updateCarts(store))}
-              onRemoveFromCart={(store => this.updateCarts(store))}
-            ></Player>
-          </SlideoutPanel>
-        </>
-        :
-        <div className='align-center-container' style={{ height: '100%' }}>
-          <div style={{
-            width: '50%',
-            borderRadius: 10,
-            padding: 20,
-            boxShadow: 'rgba(0, 0, 0, 0.27) 2px 2px 40px 0px',
-          }}>
-            <h1 style={{ marginTop: 0, textAlign: 'center' }}>Login</h1>
-            <Login
-              onLoginDone={this.onLoginDone.bind(this)}
+      {this.state.loading ? 'Loading...' :
+        this.state.loggedIn ?
+          <>
+            <Menu ref="menu"
+              loggedIn={this.state.loggedIn}
               onLogoutDone={this.onLogoutDone.bind(this)}
-              loginPath={'/login'}
-              logoutPath={'/logout'} />
+              onStoreLoginDone={() => { }} //this.onStoreLoginDone.bind(this)}
+              onUpdateTracks={this.updateTracks.bind(this)}
+            ></Menu>
+            <SlideoutPanel
+              ref="slideout"
+              onOpen={this.updateLogins.bind(this)}
+            >
+              <Player
+                onMenuClicked={() => {
+                  this.refs['slideout'].toggle()
+                }}
+                carts={this.state.carts}
+                tracks={this.state.tracksData.tracks}
+                newTracks={this.state.tracksData.meta.newTracks}
+                totalTracks={this.state.tracksData.meta.totalTracks}
+                onAddToCart={(store => this.updateCarts(store))}
+                onRemoveFromCart={(store => this.updateCarts(store))}
+              ></Player>
+            </SlideoutPanel>
+          </>
+          :
+          <div className='align-center-container' style={{ height: '100%' }}>
+            <div style={{
+              width: '50%',
+              borderRadius: 10,
+              padding: 20,
+              boxShadow: 'rgba(0, 0, 0, 0.27) 2px 2px 40px 0px',
+            }}>
+              <h1 style={{ marginTop: 0, textAlign: 'center' }}>Login</h1>
+              <Login
+                onLoginDone={this.onLoginDone.bind(this)}
+                onLogoutDone={this.onLogoutDone.bind(this)}
+                loginPath={'/login'}
+                logoutPath={'/logout'} />
+            </div>
           </div>
-        </div>
       }
     </div >
   }

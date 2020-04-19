@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Login from './UserLogin.js'
 import SessionLogin from './SessionLogin.js'
 import CookieLogin from './CookieLogin.js'
 import RefreshButton from './RefreshButton'
