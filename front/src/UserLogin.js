@@ -53,8 +53,6 @@ export default class Login extends Component {
       this.setState({ loggingOut: false, loggedIn: false, logoutError: false })
       this.props.onLogoutDone()
     } catch (e) {
-      console.log(e)
-      debugger
       this.setState({ logoutError: true, loggingOut: false })
     }
   }
