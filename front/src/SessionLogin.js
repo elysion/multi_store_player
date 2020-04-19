@@ -20,7 +20,7 @@ export default class SessionLogin extends Component {
   }
 
   async submitLogin() {
-    this.setState({ loggingIn: true })
+    this.setState({ loggingIn: true, loginError: false })
 
     try {
       await requestWithCredentials({
@@ -35,6 +35,7 @@ export default class SessionLogin extends Component {
       this.props.onLoginDone()
     } catch (e) {
       console.error('Login failed', e)
+      this.setState({ loggingIn: false, loginError: true })
     }
   }
 

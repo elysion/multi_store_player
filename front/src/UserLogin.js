@@ -104,7 +104,7 @@ export default class Login extends Component {
             disabled={this.state.loggingIn || this.state.loggedIn}
           >Login</button>
           {
-            this.state.loginError ? 'Logout failed' : ''
+            this.state.loginError ? 'Login failed' : ''
           }
         </form>
       }
