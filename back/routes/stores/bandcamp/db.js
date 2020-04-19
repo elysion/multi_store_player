@@ -41,12 +41,11 @@ module.exports.insertTrackPreview = (tx, store__track_id, newStoreTrack) => tx.q
 // language=PostgreSQL
   SQL`
 INSERT INTO store__track_preview
-  (store__track_id, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_track_duration_ms, store__track_preview_url)
+  (store__track_id, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_url)
   VALUES (
     ${store__track_id},
     'mp3',
     0,
-    ${parseInt(newStoreTrack.duration * 1000, 10)},
     ${parseInt(newStoreTrack.duration * 1000, 10)},
     ''
   )

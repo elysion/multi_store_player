@@ -11,7 +11,7 @@ body {
 }
 
 .app {
-    margin-top: 70px;
+    margin-top: 80px;
 }
 
 .track {
@@ -73,7 +73,7 @@ body {
     width: 100%;
     background: white;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16);
-    height: 70px;
+    height: 80px;
     z-index: 1;
 }
 
@@ -122,13 +122,8 @@ button::-moz-focus-inner {
     text-overflow: ellipsis;
 }
 
-.button__dark {
-    background-color: rgb(250, 250, 250);
-    color: rgb(90, 90, 90);
-}
-
 .button__light {
-    background-color: rgb(250, 250, 250);
+    background-color: white;
     color: rgb(90, 90, 90);
 }
 
@@ -136,6 +131,8 @@ button::-moz-focus-inner {
     display: -webkit-flex;
     display: flex;
     width: 100%;
+    border: 1px solid lightgray;
+    padding: 5px 0;
 }
 
 .button-playback {
@@ -266,6 +263,10 @@ audio {
     margin: 6px 0;
 }
 
+.login-label-text {
+    padding-bottom: 4px;
+}
+
 .login-label-text-small {
     display: block;
 }
@@ -282,6 +283,7 @@ audio {
 
 .login-button {
     width: 100%;
+    margin-top: 1rem;
 }
 
 .menu-container {

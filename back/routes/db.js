@@ -65,9 +65,9 @@ module.exports.queryUserTracks = username =>
             'url', store__track_preview_url,
             'start_ms', store__track_preview_start_ms,
             'end_ms', store__track_preview_end_ms,
-            'track_duration_ms', store__track_preview_track_duration_ms,
             'waveform', store__track_preview_waveform_url
           )
+          ORDER BY store__track_preview_end_ms - store__track_preview_start_ms DESC
         ) AS previews
       FROM user_tracks ut
         NATURAL JOIN store__track
@@ -112,7 +112,7 @@ SELECT
   distinct on (score, release_date, ut.track_id) -- TODO sort by lowest price
   ut.track_id       AS id,
   track_title       AS title,
-  user__track_heard AS heard,
+  user__track_heard IS NOT NULL AS heard,
   track_duration_ms AS duration,
   json_build_object(
       'name', label_name,
@@ -192,7 +192,7 @@ module.exports.getLongestPreviewForTrack = (id, format) =>
       store__track  NATURAL JOIN
       store
     WHERE track_id = ${id} AND store__track_preview_format = ${format}
-    ORDER BY store__track_preview_track_duration_ms DESC
+    ORDER BY store__track_preview_end_ms - store__track_preview_start_ms DESC
     LIMIT 1;
     `
   ).then(R.head)

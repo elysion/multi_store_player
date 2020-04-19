@@ -18,7 +18,8 @@ const handleErrorOrCallFn = R.curry((errorHandler, fn) => (err, res) => err ? er
 
 const getApi = session => {
   const api = {
-    getFanId: callback => session.getJson(`${rootUri}/api/fan/2/collection_summary`, handleErrorOrCallFn(callback, res => callback(null, res.fan_id))),
+    getFanId: callback => session.getJson(`${rootUri}/api/fan/2/collection_summary`, handleErrorOrCallFn(callback, res => res.error ? callback(res) : callback(null, res.fan_id)
+    )),
     getStories: (fan_id, since, callback) => // TODO: get tracks from entries instead from track_list
       session.postForm(`${rootUri}/fan_dash_feed_updates`, {
       fan_id,
@@ -51,15 +52,14 @@ const handleCreateSessionResponse = callback => (err, session) => {
     return callback(err)
   }
   const api = getApi(session)
-  const ensureLoginSuccessful = () => api.getFanId(err => {
+
+  return api.getFanId((err, res) => {
     if (err) {
-      callback(err)
+      return callback(err)
     } else {
-      callback(null, api)
+      return callback(null, api)
     }
   })
-
-  return ensureLoginSuccessful()
 }
 
 const initializers = {

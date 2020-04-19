@@ -9,17 +9,18 @@ INSERT INTO artist (artist_name)
   VALUES (${artistName})
   ON CONFLICT DO NOTHING`)
 
-module.exports.insertUserTrack = (tx, username, insertedTrackId) =>
+module.exports.addStoreTracksToUser = (tx, username, tracks) =>
   tx.queryRowsAsync(
 // language=PostgreSQL
     SQL`
 INSERT INTO user__track (track_id, meta_account_user_id)
 SELECT
-${insertedTrackId},
+track_id,
 meta_account_user_id
-FROM meta_account
-WHERE meta_account_username = ${username}
+FROM meta_account, store__track
+WHERE meta_account_username = ${username} AND store__track_store_id :: TEXT = ANY(${R.pluck('id', tracks)})
 ON CONFLICT DO NOTHING
+RETURNING track_id
 `)
 
 module.exports.findNewTracks = (tx, bpStoreId, tracks) =>
@@ -40,14 +41,13 @@ WHERE id :: TEXT NOT IN (
 module.exports.insertTrackPreview = (tx, store__track_id, previews) => tx.queryRowsAsync(
 // language=PostgreSQL
   SQL`
-INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms, store__track_preview_track_duration_ms)
+INSERT INTO store__track_preview (store__track_id, store__track_preview_url, store__track_preview_format, store__track_preview_start_ms, store__track_preview_end_ms)
   SELECT
     ${store__track_id},
     value ->> 'url',
     key :: PREVIEW_FORMAT,
     (value -> 'offset' ->> 'start') :: INTEGER,
-    (value -> 'offset' ->> 'end') :: INTEGER,
-    (value -> 'duration' ->> 'milliseconds') :: INTEGER
+    (value -> 'offset' ->> 'end') :: INTEGER
   FROM json_each(${JSON.stringify(previews)} :: JSON) -- todo: JSON -> JSONB?
   WHERE value ->> 'url' IS NOT NULL
   RETURNING store__track_preview_id
