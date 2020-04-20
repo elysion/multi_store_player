@@ -138,7 +138,7 @@ FROM user_tracks ut
 WHERE
   release_date > (now() - INTERVAL '10 days') OR
   user__track_heard IS NULL OR
-  user__track_heard > (now() - INTERVAL '5 days')
+  user__track_heard > (now() - INTERVAL '1 days')
 ORDER BY score DESC, release_date DESC, ut.track_id
   ),
 tracks_list AS (
