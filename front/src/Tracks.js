@@ -132,7 +132,7 @@ class Track extends Component {
           {/*+ Follow*/}
         {/*</PillButton>*/}
       </td>
-      <td style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+      {/* <td style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         {
           this.props.stores.map(store =>
             <PillButton
@@ -150,7 +150,7 @@ class Track extends Component {
               {this.isInCart(store) ? '-' : '+'} {store.name}
             </PillButton>
           )}
-      </td>
+      </td> */}
       <td style={{ flex: 1, overflow: 'hidden' }} className="unfollow-row">
         {/*<PillButton className={'table-cell-button'}>*/}
           {/*by genre*/}
