@@ -19,6 +19,12 @@ class RefreshButton extends Component {
         this.updateTracks = this.updateTracks.bind(this)
     }
 
+    static get defaultProps() {
+        return {
+            size: 'large'
+        }
+    }
+
     async refresh() {
         this.setState({ refreshing: true, refreshError: false, refreshDone: false })
 
@@ -70,7 +76,8 @@ class RefreshButton extends Component {
                     onClick={this.updateTracks}
                     loadingLabel='Updating'
                     label='Update tracks'
-                    className='login-button'
+                    className={`login-button ${this.props.className}`}
+                    size={this.props.size}
                 />
                 {this.state.updateError ? 'Failed to update tracks from server' : ''}
             </> :
@@ -80,7 +87,8 @@ class RefreshButton extends Component {
                     onClick={this.refresh}
                     loadingLabel='Refreshing'
                     label='Refresh'
-                    className='login-button'
+                    className={`login-button ${this.props.className}`}
+                    size={this.props.size}
                 />
                 {this.state.refreshError ? 'Failed to fetch status from server' : ''}
             </>

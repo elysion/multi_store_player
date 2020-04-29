@@ -40,7 +40,7 @@ class Preview extends Component {
   }
 
   render() {
-    const menu = <button style={{ position: 'absolute', margin: 10 }} onClick={() => this.props.onMenuClicked()}>
+    const menu = <button style={{ position: 'absolute', margin: 10, color: 'white' }} onClick={() => this.props.onMenuClicked()}>
       <FontAwesome name='bars' /> {this.props.showHint ? <><FontAwesome name='long-arrow-left' />&nbsp;Start here!</> : ''}
     </button>
     if (!this.props.currentTrack) {
@@ -54,12 +54,6 @@ class Preview extends Component {
     const endPosition = mp3Preview.end_ms
     const toPositionPercent = currentPosition => (currentPosition + startOffset) / totalDuration * 100
 
-    const clipEdgeOverlayStyle = {
-      height: '100%',
-      background: 'white',
-      opacity: 0.6,
-      position: 'absolute'
-    }
     return <div className='preview'>
       {menu}
       <TrackTitle className="preview-title" artists={(this.props.currentTrack || { artists: [] }).artists}
@@ -90,16 +84,16 @@ class Preview extends Component {
               WebkitClipPath: `polygon(${toPositionPercent(0)}% 0, ${toPositionPercent(this.state.position)}% 0, ${toPositionPercent(this.state.position)}% 100%, ${toPositionPercent(0)}% 100%)`,
               WebkitMaskImage: waveform ? `url(${waveform})` : 'none'
             }} />
-          <div style={{
-            width: `${toPositionPercent(0)}%`,
-            left: 0,
-            ...clipEdgeOverlayStyle
-          }} />
-          <div style={{
-            width: `${100 - 100 * endPosition / totalDuration}%`,
-            right: 0,
-            ...clipEdgeOverlayStyle
-          }} />
+          <div className={'waveform_clip-edge-overlay'}
+            style={{
+              width: `${toPositionPercent(0)}%`,
+              left: 0
+            }} />
+          <div className={'waveform_clip-edge-overlay'}
+            style={{
+              width: `${100 - 100 * endPosition / totalDuration}%`,
+              right: 0
+            }} />
         </div>
         {
           <audio className='fluid'

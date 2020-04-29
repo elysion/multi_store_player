@@ -10,8 +10,9 @@ class SpinnerButton extends Component {
     return <button
       type='submit'
       disabled={this.props.loading}
-      className={`button menu-item button-push_button-${this.props.size} button-push_button-primary ${
+      className={`button button-push_button-${this.props.size} button-push_button-primary ${
         this.props.className}`}
+      style={this.props.style}
       onClick={this.props.onClick}>
       {
         this.props.loading ?

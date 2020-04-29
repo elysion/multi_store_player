@@ -57,7 +57,7 @@ export default class Menu extends Component {
       <div className={"menu-stores"}>
         <h2>Player</h2>
         <button
-          className={`button menu-item button-push_button-small button-push_button-primary`}
+          className={`button menu-item button-push_button-large button-push_button-primary`}
           onClick={this.logout}>
           Logout
         </button>
@@ -83,7 +83,7 @@ export default class Menu extends Component {
               <SessionLogin
                 loginPath={"/stores/beatport/login"}
                 logoutPath={"/stores/beatport/logout"}
-                size={"small"}
+                size={"large"}
                 loginName={"beatport"}
                 sessionProperties={{
                   csrfToken: 'CSRF Token',
@@ -95,6 +95,7 @@ export default class Menu extends Component {
                 loggedInContent={
                   <RefreshButton store={'beatport'}
                     onUpdateTracks={this.props.onUpdateTracks}
+                    className='menu-item'
                   />
                 }
               />
@@ -104,13 +105,14 @@ export default class Menu extends Component {
               <CookieLogin
                 loginPath={"/stores/bandcamp/login"}
                 logoutPath={"/stores/bandcamp/logout"}
-                size={"small"}
+                size={"large"}
                 loggedIn={this.state.validSessions.has('bandcamp')}
                 onLoginDone={this.updateLogins.bind(this)}
                 onLogoutDone={this.updateLogins.bind(this)}
                 loggedInContent={
-                  <RefreshButton store={'bandcamp'}
+                  <RefreshButton store={'bandcamp'} size={'large'}
                     onUpdateTracks={this.props.onUpdateTracks}
+                    className='menu-item'
                   />
                 }
               />

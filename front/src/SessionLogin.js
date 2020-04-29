@@ -45,7 +45,7 @@ export default class SessionLogin extends Component {
         {this.props.loggedInContent}
         <button
           disabled={this.state.loggingOut}
-          className={'button login-button button-push_button-small button-push_button-primary'}
+          className={`button login-button button-push_button-${this.props.size} button-push_button-primary`}
           onClick={async () => {
             try {
               await requestWithCredentials({
@@ -91,6 +91,7 @@ export default class SessionLogin extends Component {
           loadingLabel='Logging in'
           label='Login'
           onClick={this.submitLogin.bind(this)}
+          size={this.props.size}
         >Login
         </SpinnerButton>
         {

@@ -64,7 +64,7 @@ export default class Login extends Component {
         <>
           <button
             disabled={this.state.loggingOut}
-            className={'button login-button button-push_button-small button-push_button-primary'}
+            className={`button login-button button-push_button-${this.props.size} button-push_button-primary`}
             onClick={this.submitLogout.bind(this)}>
             Logout
             </button>

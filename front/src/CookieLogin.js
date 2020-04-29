@@ -46,7 +46,7 @@ export default class CookieLogin extends Component {
         {this.props.loggedInContent}
         <button
           disabled={this.state.loggingOut}
-          className={'button login-button button-push_button-small button-push_button-primary'}
+          className={`button login-button button-push_button-${this.props.size} button-push_button-primary` }
           onClick={async () => {
             try {
               await requestWithCredentials({
@@ -72,8 +72,8 @@ export default class CookieLogin extends Component {
         }}>
         <label className="login-label">
           <span className={`login-label-text login-label-text-${this.props.size}`}>
-            Cookie
-          <PillButton style={{ float: 'right' }}
+            Cookie<br/>
+          <PillButton
               onClick={(e) => {
                 const el = document.createElement('textarea');
                 el.value = 'copy(document.cookie)'
@@ -106,6 +106,7 @@ export default class CookieLogin extends Component {
           loading={this.state.loggingIn}
           loadingLabel='Logging in'
           label='Login'
+          size={this.props.size}
         />
         {this.state.loginError ? <span>Login failed.</span> : null}
         {this.props.loggedOutContent}
