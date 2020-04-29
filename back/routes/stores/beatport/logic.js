@@ -101,11 +101,8 @@ const refreshDownloadedTracks = (username, firstPage, lastPage) =>
         try {
           const beatportStoreDbId = await getBeatportStoreDbId()
           const insertedNewTracks = await insertNewTracksToDb(tx, tracks)
-          for (const track of tracks) {
-            const addedTrackId = await addStoreTrackToUser(tx, username, track.id)
-            setTrackHeard(trackId, username, true)
-          }
-          for (const trackId of insertedNewTracks) {
+          const addedTracks = await addStoreTracksToUser(tx, username, tracks)
+          for (const trackId of [...addedTracks, ...insertedNewTracks]) {
             setTrackHeard(trackId, username, true)
           }
           log(
