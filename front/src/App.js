@@ -123,6 +123,7 @@ class App extends Component {
               width: '50%',
               borderRadius: 10,
               padding: 20,
+              backgroundColor: '#ccc',
               boxShadow: 'rgba(0, 0, 0, 0.27) 2px 2px 40px 0px',
             }}>
               <h1 style={{ marginTop: 0, textAlign: 'center' }}>Login</h1>
