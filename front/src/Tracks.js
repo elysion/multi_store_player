@@ -62,7 +62,8 @@ class Track extends Component {
     super(props)
     this.state = {
       cartButtonDisabled: false,
-      ignoreArtistsByLabelDisabled: false
+      ignoreArtistsByLabelDisabled: false,
+      heardHover: false
     }
   }
 
@@ -82,6 +83,10 @@ class Track extends Component {
     return this.props.inCart.includes(store.name.toLowerCase())
   }
 
+  setHeardHover(toState) {
+    return this.setState({heardHover: toState})
+  }
+
   render() {
     return <tr
       ref={'row'}
@@ -98,8 +103,11 @@ class Track extends Component {
       <td style={{ flex: 0.5, overflow: 'hidden' }}>
         {
           this.props.heard ? null :
-            <button className="button table-cell-button">
-              <FontAwesome name="circle"/>
+            <button className="button table-cell-button"
+              onClick={this.props.onDoubleClick.bind(this)}
+              onMouseEnter={() => this.setHeardHover(true)}
+              onMouseLeave={() => this.setHeardHover(false)}>
+              { this.state.heardHover ? <FontAwesome name="play"/> : <FontAwesome name="circle"/> }
             </button>
         }
       </td>
