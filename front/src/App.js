@@ -9,6 +9,8 @@ import SlideoutPanel from './SlideoutPanel.js'
 
 import { requestJSONwithCredentials } from './request-json-with-credentials.js'
 
+import 'typeface-lato'
+
 // import injectTapEventPlugin from 'react-tap-event-plugin';
 // injectTapEventPlugin();
 
