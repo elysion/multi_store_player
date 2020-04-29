@@ -154,6 +154,8 @@ class Player extends Component {
         newTracks={this.props.newTracks - this.state.listenedTracks}
         totalTracks={this.props.totalTracks}
         currentTrack={(this.state.currentTrack || {}).id}
+        onMarkAllHeardClicked={this.props.onMarkAllHeardClicked}
+        onUpdateTracksClicked={this.props.onUpdateTracksClicked}
         onAddToCart={this.addToCart}
         onRemoveFromCart={this.removeFromCart}
         onIgnoreArtistsByLabel={this.ignoreArtistsByLabel}

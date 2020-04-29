@@ -3,6 +3,7 @@ import * as R from 'ramda'
 import FontAwesome from 'react-fontawesome'
 import PillButton from './PillButton.js'
 import ExternalLink from './ExternalLink'
+import SpinnerButton from './SpinnerButton'
 
 class Share extends Component {
   constructor(props) {
@@ -186,7 +187,11 @@ class Track extends Component {
 class Tracks extends Component {
   constructor(props) {
     super(props)
-    this.state = { selectedTrack: (props.tracks[0] || {}).id, currentTrack: -1 }
+    this.state = {
+      selectedTrack: (props.tracks[0] || {}).id,
+      currentTrack: -1,
+      markingHeard: false
+    }
   }
 
   renderTracks(tracks, carts) {
@@ -229,28 +234,66 @@ class Tracks extends Component {
   }
 
   render() {
-    return <table className="tracks-table" style={{ height: "100%", overflow: "hidden", display: "block" }}>
-      <thead style={{ width: "100%", display: "block" }}>
-      <tr style={{ width: "100%", display: "flex" }}>
-        <th colSpan={9} style={{flex: 1}}>New tracks: {this.props.newTracks} / {this.props.totalTracks} </th>
-      </tr>
-      <tr style={{ width: "100%", display: "flex" }}>
-        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>New</th>
-        <th style={{ flex: 3, overflow: 'hidden' }}>Artist</th>
-        <th style={{ flex: 3, overflow: 'hidden' }}>Title</th>
-        <th style={{ flex: 2, overflow: 'hidden' }}>Remixer</th>
-        <th style={{flex: 2, overflow: 'hidden'}}>Label</th>
-        <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th>
-        <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow Artists</th>
-        <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Open in</th>
-      </tr>
-      </thead>
-      <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>
-      {
-        this.renderTracks(this.props.tracks, this.props.carts)
-      }
-      </tbody>
-    </table>
+    return <>
+      <div style={{display: 'flex', alignItems: 'center', color: 'white'}}>
+        <div style={{height: '100%', flex: 1, padding: 4}}>
+          <SpinnerButton
+            size={'large'}
+            loading={this.state.markingHeard}
+            onClick={async () => {
+              this.setState({markingHeard: true})
+              await this.props.onMarkAllHeardClicked()
+              this.setState({markingHeard: false})
+            }}
+            style={{margin: 2, height: '100%', width: 300, margin: 4}}
+            label={'Mark all heard'}
+            loadingLabel={'Marking all heard'}
+            />
+          <SpinnerButton
+            size={'large'}
+            loading={this.state.updatingTracks}
+            onClick={async () => {
+              this.setState({updatingTracks: true})
+              try {
+                await this.props.onUpdateTracksClicked()
+              } finally {
+                this.setState({updatingTracks: false})
+              }
+            }}
+            style={{margin: 2, height: '100%', width: 300, margin: 4}}
+            label={'Update list'}
+            loadingLabel={'Updating list'}
+            />
+        </div>
+        <div style={{flex: 1, textAlign: 'right', padding: 4}}>
+          <PillButton style={{padding: 4, '-webkit-filter': '', backgroundColor: '#444', color: 'white'}}>
+            New: {this.props.newTracks}
+          </PillButton>
+          <PillButton style={{ padding: 4, '-webkit-filter': '', backgroundColor: '#444', color: 'white'}}>
+            Total: {this.props.totalTracks}
+          </PillButton>
+        </div>
+      </div>
+      <table className="tracks-table" style={{ height: "100%", overflow: "hidden", display: "block" }}>
+        <thead style={{ width: "100%", display: "block" }}>
+        <tr style={{ width: "100%", display: "flex" }}>
+          <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>New</th>
+          <th style={{ flex: 3, overflow: 'hidden' }}>Artist</th>
+          <th style={{ flex: 3, overflow: 'hidden' }}>Title</th>
+          <th style={{ flex: 2, overflow: 'hidden' }}>Remixer</th>
+          <th style={{flex: 2, overflow: 'hidden'}}>Label</th>
+          {/* <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th> */}
+          <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow{/*Artists*/}</th>
+          <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Open in</th>
+        </tr>
+        </thead>
+        <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>
+        {
+          this.renderTracks(this.props.tracks, this.props.carts)
+        }
+        </tbody>
+      </table>
+    </>
   }
 }
 

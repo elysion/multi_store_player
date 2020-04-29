@@ -7,7 +7,7 @@ import Player from './Player.js'
 import './App.css'
 import SlideoutPanel from './SlideoutPanel.js'
 
-import { requestJSONwithCredentials } from './request-json-with-credentials.js'
+import { requestJSONwithCredentials, requestWithCredentials } from './request-json-with-credentials.js'
 
 import 'typeface-lato'
 
@@ -70,6 +70,15 @@ class App extends Component {
     this.setState({ tracksData: { tracks: tracks.slice(0, 500), meta: { newTracks, totalTracks } } })
   }
 
+  async markAllHeard() {
+    await requestWithCredentials({
+      path: `/tracks`,
+      method: 'PATCH',
+      body: { heard: true }
+    })
+    this.updateTracks()
+  }
+
   async onStoreLoginDone(store) {
     this.updateCarts(store)
   }
@@ -97,6 +106,8 @@ class App extends Component {
                 onMenuClicked={() => {
                   this.refs['slideout'].toggle()
                 }}
+                onMarkAllHeardClicked={this.markAllHeard.bind(this)}
+                onUpdateTracksClicked={this.updateTracks.bind(this)}
                 carts={this.state.carts}
                 tracks={this.state.tracksData.tracks}
                 newTracks={this.state.tracksData.meta.newTracks}

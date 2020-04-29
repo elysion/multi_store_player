@@ -183,6 +183,16 @@ WHERE
 `
   )
 
+module.exports.setAllHeard = (username, heard) =>
+  pg.queryAsync(
+    SQL`
+UPDATE user__track
+SET user__track_heard = ${heard ? 'NOW()' : null}
+WHERE
+  meta_account_user_id = (SELECT meta_account_user_id FROM meta_account WHERE meta_account_username = ${username})
+    `
+  )
+
 module.exports.getLongestPreviewForTrack = (id, format) =>
   pg.queryRowsAsync(
     SQL`

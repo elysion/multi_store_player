@@ -5,6 +5,7 @@ const router = require('express').Router()
 const {
   queryUserTracks,
   setTrackHeard,
+  setAllHeard,
   getTracksM3u,
   addArtistsOnLabelsToIgnore,
   getStorePreviewRedirectForTrack
@@ -43,6 +44,12 @@ router.get('/tracks.pls', ensureAuthenticated, ({ user: { username } }, res, nex
 router.post('/tracks/:id', ({ user: { username }, params: { id }, body: { heard } }, res, next) => {
   // language=PostgreSQL
   setTrackHeard(id, username, heard)
+    .tap(() => res.send())
+    .catch(next)
+})
+
+router.patch('/tracks/', ({ user: { username }, body: { heard }, res, next}) => {
+  setAllHeard(username, heard)
     .tap(() => res.send())
     .catch(next)
 })

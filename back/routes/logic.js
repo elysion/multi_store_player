@@ -3,7 +3,8 @@ const pg = require('../db/pg.js')
 const {apiRoot} = require('../config.js')
 
 const removeIgnoredTracksFromUser = require('../remove-ignored-tracks-from-user.js')
-const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard, getLongestPreviewForTrack } = require('./db.js')
+const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard, setAllHeard, getLongestPreviewForTrack } =
+  require('./db.js')
 
 module.exports.queryUserTracks = queryUserTracks
 module.exports.getTracksM3u = username =>
@@ -19,6 +20,7 @@ module.exports.getTracksM3u = username =>
   })
 
 module.exports.setTrackHeard = setTrackHeard
+module.exports.setAllHeard = setAllHeard
 
 module.exports.addArtistOnLabelToIgnore = addArtistOnLabelToIgnore
 module.exports.addArtistsOnLabelsToIgnore = (username, artistsAndLabels) =>
