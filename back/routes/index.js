@@ -10,8 +10,9 @@ const {
   getStorePreviewRedirectForTrack
 } = require('./logic.js')
 
-router.get('/logout', function(req, res) {
+router.post('/logout', function(req, res) {
   req.logout()
+  res.status(204).send()
 })
 
 const ensureAuthenticated = (req, res, next) => {
@@ -21,7 +22,7 @@ const ensureAuthenticated = (req, res, next) => {
 router.use(bodyParser.json())
 router.post('/login', passport.authenticate('local'), (req, res) => res.status(204).end())
 
-router.get('/tracks/:id/preview.:format', ({ params: {id, format}}, res, next) => 
+router.get('/tracks/:id/preview.:format', ({ params: {id, format}}, res, next) =>
   getStorePreviewRedirectForTrack(id, format)
     .tap(url => res.redirect(url))
     .catch(next)

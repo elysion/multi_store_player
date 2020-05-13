@@ -4,6 +4,59 @@ import FontAwesome from 'react-fontawesome'
 import PillButton from './PillButton.js'
 import ExternalLink from './ExternalLink'
 
+class Share extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      open: false
+    }
+  }
+
+  render() {
+    return <>
+      <PillButton
+        className={'table-cell-button expand-collapse-button'}
+        onClick={() => this.setState({open: !this.state.open})}>
+        <FontAwesome name={this.state.open ? "caret-up" : "caret-down"}/>
+      </PillButton>
+      {this.state.open ?
+        [<br/>,
+        <ul className={'no-style-list'}>
+          { this.props.stores.find(R.propEq('code', 'beatport')) ?
+          <li>
+            <ExternalLink
+              href={`https://www.beatport.com/track/${this.props.title.toLowerCase().replace(' ', '-')}/${this.props.stores.find(R.propEq('code', 'beatport')).trackId}`}>
+              Beatport
+            </ExternalLink>
+          </li> : null
+          }
+          { this.props.stores.find(R.propEq('code', 'bandcamp')) ?
+          <li>
+            <ExternalLink
+              href={`${this.props.stores.find(R.propEq('code', 'bandcamp')).url}`}>
+              Bandcamp
+            </ExternalLink>
+          </li> : null
+          }
+          <li>
+            <ExternalLink
+              href={`https://www.youtube.com/results?search_query=${this.props.artists.map(R.prop('name')).join('+')}+${this.props.title}`}>
+              YouTube
+            </ExternalLink>
+          </li>
+          <li>
+            <ExternalLink
+              href={`https://open.spotify.com/search/${this.props.artists.map(R.prop('name')).join(' ')} ${this.props.title}`}>
+              Spotify
+            </ExternalLink>
+          </li>
+        </ul>]
+        : null
+      }
+    </>
+  }
+}
+
 class Track extends Component {
   constructor(props) {
     super(props)
@@ -102,6 +155,8 @@ class Track extends Component {
         {/*<PillButton className={'table-cell-button'}>*/}
           {/*by genre*/}
         {/*</PillButton>*/}
+        {
+          this.props.label ?
         <PillButton
           className={'table-cell-button'}
           onClick={() => {
@@ -110,25 +165,11 @@ class Track extends Component {
           }}
         >
           by label
-        </PillButton>
+        </PillButton> : null
+        }
       </td>
-      <td>
-        <ExternalLink
-          href={`https://www.beatport.com/track/${this.props.title.toLowerCase().replace(' ', '-')}/${this.props.stores.find(R.propEq('code', 'beatport')).trackId}`}>
-          Beatport
-        </ExternalLink>
-      </td>
-      <td>
-        <ExternalLink
-          href={`https://www.youtube.com/results?search_query=${this.props.artists.map(R.prop('name')).join('+')}+${this.props.title}`}>
-          YouTube
-        </ExternalLink>
-      </td>
-      <td>
-        <ExternalLink
-          href={`https://open.spotify.com/search/${this.props.artists.map(R.prop('name')).join(' ')} ${this.props.title}`}>
-          Spotify
-        </ExternalLink>
+      <td style={{ flex: 1, overflow: 'hidden' }}>
+        <Share stores={this.props.stores} artists={this.props.artists} title={this.props.title}></Share>
       </td>
     </tr>
   }
@@ -193,9 +234,7 @@ class Tracks extends Component {
         <th style={{flex: 2, overflow: 'hidden'}}>Label</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Cart</th>
         <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Unfollow Artists</th>
-        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>Beatport</th>
-        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>YouTube</th>
-        <th style={{ flex: 0.5, overflow: 'hidden' }} className={'table-button-cell-header'}>Spotify</th>
+        <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Open in</th>
       </tr>
       </thead>
       <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>

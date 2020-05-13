@@ -1,5 +1,6 @@
 const BPromise = require('bluebird')
 const pg = require('../db/pg.js')
+const {apiRoot} = require('../config.js')
 
 const removeIgnoredTracksFromUser = require('../remove-ignored-tracks-from-user.js')
 const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard, getLongestPreviewForTrack } = require('./db.js')
@@ -29,4 +30,4 @@ module.exports.addArtistsOnLabelsToIgnore = (username, artistsAndLabels) =>
 
 module.exports.getStorePreviewRedirectForTrack = (id, format) =>
   getLongestPreviewForTrack(id, format)
-    .then(({storeCode, storeTrackId}) => `/stores/${storeCode}/tracks/${storeTrackId}/preview.${format}`)
+    .then(({storeCode, storeTrackId}) => `${apiRoot}/stores/${storeCode}/tracks/${storeTrackId}/preview.${format}`)

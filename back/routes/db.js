@@ -18,12 +18,12 @@ module.exports.queryUserTracks = username =>
         user__track_heard,
         track_added,
         track_duration_ms,
-        COALESCE(SUM(user_label_scores_score) + SUM(user_artist_scores_score), 0) AS score
+        SUM(COALESCE(user_label_scores_score, 0)) + SUM(COALESCE(user_artist_scores_score, 0)) AS score
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
         NATURAL JOIN track__artist
-        NATURAL JOIN track__label
+        NATURAL LEFT JOIN track__label
         NATURAL LEFT JOIN user_label_scores
         NATURAL LEFT JOIN user_artist_scores
       GROUP BY 1, 2, 3, 4, 5
@@ -65,9 +65,9 @@ module.exports.queryUserTracks = username =>
             'url', store__track_preview_url,
             'start_ms', store__track_preview_start_ms,
             'end_ms', store__track_preview_end_ms,
-            'track_duration_ms', store__track_preview_track_duration_ms,
             'waveform', store__track_preview_waveform_url
           )
+          ORDER BY store__track_preview_end_ms - store__track_preview_start_ms DESC
         ) AS previews
       FROM user_tracks ut
         NATURAL JOIN store__track
@@ -82,10 +82,14 @@ module.exports.queryUserTracks = username =>
         store__track_id,
         store__track_released,
         store_name,
-        store__track_store_id
+        store__track_store_id,
+        store__release_url
       FROM user_tracks ut
         NATURAL JOIN store__track
         NATURAL JOIN store
+        NATURAL LEFT JOIN release__track
+        NATURAL LEFT JOIN release
+        NATURAL LEFT JOIN store__release
   ),
     stores AS (
       SELECT
@@ -96,7 +100,8 @@ module.exports.queryUserTracks = username =>
                 'name', store_name,
                 'code', lower(store_name),
                 'id', store_id,
-                'trackId', store__track_store_id
+                'trackId', store__track_store_id,
+                'url', store__release_url
             )
         ) AS stores
       FROM store_tracks
@@ -107,7 +112,7 @@ SELECT
   distinct on (score, release_date, ut.track_id) -- TODO sort by lowest price
   ut.track_id       AS id,
   track_title       AS title,
-  user__track_heard AS heard,
+  user__track_heard IS NOT NULL AS heard,
   track_duration_ms AS duration,
   json_build_object(
       'name', label_name,
@@ -123,8 +128,8 @@ SELECT
   score
 
 FROM user_tracks ut
-  NATURAL JOIN track__label
-  NATURAL JOIN label
+  NATURAL LEFT JOIN track__label
+  NATURAL LEFT JOIN label
   NATURAL JOIN authors
   NATURAL LEFT JOIN remixers
   NATURAL JOIN previews
@@ -172,8 +177,8 @@ module.exports.setTrackHeard = (trackId, username, heard) =>
     SQL`
 UPDATE user__track
 SET user__track_heard = ${heard ? 'now()' : null}
-WHERE 
-  track_id = ${trackId} AND 
+WHERE
+  track_id = ${trackId} AND
   meta_account_user_id = (SELECT meta_account_user_id FROM meta_account WHERE meta_account_username = ${username})
 `
   )
@@ -182,12 +187,12 @@ module.exports.getLongestPreviewForTrack = (id, format) =>
   pg.queryRowsAsync(
     SQL`
     SELECT store__track_id AS "storeTrackId" , lower(store_name) AS "storeCode"
-    FROM 
-      store__track_preview NATURAL JOIN 
-      store__track  NATURAL JOIN 
+    FROM
+      store__track_preview NATURAL JOIN
+      store__track  NATURAL JOIN
       store
     WHERE track_id = ${id} AND store__track_preview_format = ${format}
-    ORDER BY store__track_preview_track_duration_ms DESC 
+    ORDER BY store__track_preview_end_ms - store__track_preview_start_ms DESC
     LIMIT 1;
     `
   ).then(R.head)
