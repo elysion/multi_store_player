@@ -70,7 +70,7 @@ const addTracksToUser = (tx, username, tracks) =>
 
 const getRefreshStatus = module.exports.getRefreshStatus = (username, uuid) => getOperation(username, uuid)
 
-const startRefreshUserTracks = module.exports.startRefreshUserTracks = (username, firstPage = 1, lastPage = 100) => {
+const startRefreshUserTracks = module.exports.startRefreshUserTracks = (username, firstPage = 1, lastPage = 20) => {
   log(`Refreshing tracks from ${username}'s Beatport`)
   return createOperation('refresh-beatport', username, { username, firstPage, lastPage },
     () => refreshUserTracks(username, firstPage, lastPage))
@@ -125,7 +125,7 @@ const refreshDownloadedTracks = (username, firstPage, lastPage) =>
 module.exports.getPreviewUrl = (id, format) => getBeatportStoreDbId()
   .then(bpStoreId => queryPreviewUrl(id, format, bpStoreId))
 
-const refreshUserTracks = module.exports.refreshUserTracks = (username, firstPage = 1, lastPage = 100) => {
+const refreshUserTracks = module.exports.refreshUserTracks = (username, firstPage = 1, lastPage = 20) => {
   log(`Refreshing new tracks from page ${lastPage} of ${username}'s My Beatport`)
   return BPromise.all([refreshNewTracks(username, firstPage, lastPage), refreshDownloadedTracks(username, firstPage, lastPage)])
 }
