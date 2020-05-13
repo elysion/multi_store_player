@@ -10,8 +10,9 @@ class Player extends Component {
 
     this.state = {
       currentTrack: null,
+      heardTracks: props.tracks.heard,
       listenedTracks: 0,
-      changedTracks: {},
+      listState: 'new'
     }
 
     // if (this.props.tracks.length !== 0) {
@@ -59,18 +60,21 @@ class Player extends Component {
   }
 
   markAsPlayed(trackId) {
-    const track = this.props.tracks.find(R.propEq('id', trackId))
-    const changedTrack = this.state.changedTracks[trackId]
-    let listenedTracks = this.state.listenedTracks
-    if (!track.heard && (!changedTrack || !changedTrack.heard)) {
-      listenedTracks++
+    if (this.state.listState === 'heard') {
+      return
     }
 
-    const updatedTrack = R.assoc('heard', true, track)
-    this.setState({
-      changedTracks: R.assocPath([trackId], updatedTrack, this.state.changedTracks),
-      listenedTracks
-    })
+    let updatedHeardTracks = this.state.heardTracks
+    const updatedTrack = R.assoc('heard', true, this.getTracks().find(R.propEq('id', trackId)))
+    const playedTrackIndex = this.state.heardTracks.findIndex(R.propEq('id', trackId))
+    if (playedTrackIndex !== -1) {
+      updatedHeardTracks.splice(playedTrackIndex, 1)
+    } else {
+      this.setState({ listenedTracks: this.state.listenedTracks + 1 })
+    }
+
+    updatedHeardTracks = R.prepend(updatedTrack, updatedHeardTracks)
+    this.setState({heardTracks: updatedHeardTracks})
   }
 
   getCurrentTrackIndex() {
@@ -78,7 +82,7 @@ class Player extends Component {
   }
 
   getTrackIndex(track) {
-    return R.findIndex(R.propEq('id', track.id), this.props.tracks)
+    return R.findIndex(R.propEq('id', track.id), this.getTracks())
   }
 
   async addToCart(store, id) {
@@ -103,8 +107,8 @@ class Player extends Component {
   jumpTracks(numberOfTracksToJump) {
     const currentTrackIndex = this.getCurrentTrackIndex()
     const indexToJumpTo =
-      R.clamp(0, this.props.tracks.length - 1, currentTrackIndex + numberOfTracksToJump)
-    this.setCurrentTrack(this.props.tracks[indexToJumpTo])
+      R.clamp(0, this.getTracks().length - 1, currentTrackIndex + numberOfTracksToJump)
+    this.setCurrentTrack(this.getTracks()[indexToJumpTo])
   }
 
   playPreviousTrack() {
@@ -116,7 +120,7 @@ class Player extends Component {
   }
 
   playNextUnheard() {
-    const firstUnplayed = this.props.tracks.findIndex(R.propEq('heard', false))
+    const firstUnplayed = this.getTracks().findIndex(R.propEq('heard', false))
     this.jumpTracks(firstUnplayed - this.getCurrentTrackIndex())
   }
 
@@ -128,17 +132,31 @@ class Player extends Component {
     })
   }
 
+  setListState(listState) {
+    this.setState({listState})
+  }
+
+  getTracks() {
+    let tracks
+    if (this.state.listState === 'new') {
+      let tracks = this.props.tracks.new
+
+      this.state.heardTracks.forEach(heardTrack => {
+        const index = tracks.findIndex(R.propEq('id', parseInt(heardTrack.id, 10)))
+        if (index !== -1) {
+          tracks[index] = heardTrack
+        }
+      })
+
+      return tracks
+    } else {
+      tracks = this.state.heardTracks
+    }
+    return tracks
+  }
+
   render() {
-    let tracks = this.props.tracks
-
-    R.mapObjIndexed(
-      (_, trackId, track) => {
-        const index = this.props.tracks.findIndex(R.propEq('id', parseInt(trackId, 10)))
-        tracks[index] = track[trackId]
-      },
-      this.state.changedTracks
-    )
-
+    const tracks = this.getTracks()
     return <>
       <Preview
         key={'preview'}
@@ -151,6 +169,7 @@ class Player extends Component {
         key={'tracks'}
         carts={this.props.carts}
         tracks={tracks}
+        listState={this.state.listState}
         newTracks={this.props.newTracks - this.state.listenedTracks}
         totalTracks={this.props.totalTracks}
         currentTrack={(this.state.currentTrack || {}).id}
@@ -160,9 +179,12 @@ class Player extends Component {
         onRemoveFromCart={this.removeFromCart}
         onIgnoreArtistsByLabel={this.ignoreArtistsByLabel}
         onPreviewRequested={id => {
-          const requestedTrack = R.find(R.propEq('id', id), this.props.tracks)
+          const requestedTrack = R.find(R.propEq('id', id), this.getTracks())
           this.setCurrentTrack(requestedTrack)
-        }} />
+        }}
+        onShowNewClicked={this.setListState.bind(this, 'new')}
+        onShowHeardClicked={this.setListState.bind(this, 'heard')}
+        />
     </>
   }
 }

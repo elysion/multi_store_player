@@ -109,11 +109,11 @@ module.exports.queryUserTracks = username =>
   ),
   tracks AS (
 SELECT
-  distinct on (score, release_date, ut.track_id) -- TODO sort by lowest price
-  ut.track_id       AS id,
-  track_title       AS title,
-  user__track_heard IS NOT NULL AS heard,
-  track_duration_ms AS duration,
+  ut.track_id           AS id,
+  track_title           AS title,
+  user__track_heard     AS heard,
+  track_duration_ms     AS duration,
+  track_added           AS added,
   json_build_object(
       'name', label_name,
       'id', label_id
@@ -124,7 +124,7 @@ SELECT
   ELSE remixers.remixers END,
   previews.previews as previews,
   stores.stores,
-  stores.release_date,
+  stores.release_date AS released,
   score
 
 FROM user_tracks ut
@@ -134,25 +134,29 @@ FROM user_tracks ut
   NATURAL LEFT JOIN remixers
   NATURAL JOIN previews
   NATURAL JOIN stores
-
-WHERE
-  release_date > (now() - INTERVAL '10 days') OR
-  user__track_heard IS NULL OR
-  user__track_heard > (now() - INTERVAL '1 days')
-ORDER BY score DESC, release_date DESC, ut.track_id
   ),
-tracks_list AS (
-select json_agg(tracks) as list
-FROM tracks)
-
+  new_tracks AS (
+    SELECT json_agg(t) as new_tracks FROM (
+      SELECT * FROM tracks WHERE heard IS NULL ORDER BY score DESC, added DESC, id LIMIT 500
+    ) t
+  ),
+  heard_tracks AS (
+    SELECT json_agg(t) as heard_tracks FROM (
+      SELECT * FROM tracks WHERE heard IS NOT NULL  ORDER BY heard DESC LIMIT 100
+    ) t
+  )
   SELECT
-    CASE WHEN list IS NULL THEN '[]'::JSON ELSE list END as tracks,
+    json_build_object(
+      'new', CASE WHEN new_tracks IS NULL THEN '[]'::JSON ELSE new_tracks END,
+      'heard', CASE WHEN heard_tracks IS NULL THEN '[]'::JSON ELSE heard_tracks END
+    ) as tracks,
     json_build_object(
       'total', total,
       'new', new
     ) as meta
   FROM
-    tracks_list,
+    new_tracks,
+    heard_tracks,
     user_tracks_meta
 `).then(R.head)
 

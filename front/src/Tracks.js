@@ -264,6 +264,16 @@ class Tracks extends Component {
             label={'Update list'}
             loadingLabel={'Updating list'}
             />
+            <div className='state-select-button--container'>
+              <input type='radio' id='tracklist-state-new' name='tracklist-state' className='state-select-button--button' defaultChecked={this.props.listState === 'new'} onChange={this.props.onShowNewClicked}/>
+              <label className='state-select-button--button' for='tracklist-state-new'>
+                New tracks
+              </label>
+              <input type='radio' id='tracklist-state-heard' name='tracklist-state' className='state-select-button--button' defaultChecked={this.props.listState === 'heard'} onChange={this.props.onShowHeardClicked}/>
+              <label className='state-select-button--button' for='tracklist-state-heard'>
+                Recently played
+              </label>
+            </div>
         </div>
         <div style={{flex: 1, textAlign: 'right', padding: 4}}>
           <PillButton style={{padding: 4, '-webkit-filter': '', backgroundColor: '#444', color: 'white'}}>
@@ -287,9 +297,32 @@ class Tracks extends Component {
           <th style={{ flex: 1, overflow: 'hidden' }} className={'table-button-cell-header'}>Open in</th>
         </tr>
         </thead>
-        <tbody style={{ height: "calc(100% - 100px)", overflow: "scroll", display: "block" }}>
+        {/* Replace the calc below. Currently it is calculated as height of preview + height of status bar + height of table header + height of the button row at the end of the table */}
+        <tbody style={{ height: "calc(100% - 279px)", overflow: "scroll", display: "block" }}>
         {
           this.renderTracks(this.props.tracks, this.props.carts)
+        }
+        {
+          this.props.listState === 'new' ?
+          <tr style={{display: 'block'}}>
+            <td style={{display: 'block'}}>
+            <SpinnerButton
+                size={'large'}
+                loading={this.state.updatingTracks}
+                onClick={async () => {
+                  this.setState({updatingTracks: true})
+                  try {
+                    await this.props.onUpdateTracksClicked()
+                  } finally {
+                    this.setState({updatingTracks: false})
+                  }
+                }}
+                style={{margin: 'auto', height: '100%', display: 'block'}}
+                label={'Load more'}
+                loadingLabel={'Loading'}
+                />
+            </td>
+          </tr> : null
         }
         </tbody>
       </table>

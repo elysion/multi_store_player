@@ -14,7 +14,7 @@ import 'typeface-lato'
 // import injectTapEventPlugin from 'react-tap-event-plugin';
 // injectTapEventPlugin();
 
-const defaultTracksData = { tracks: [], meta: { totalTracks: 0, newTracks: 0 } }
+const defaultTracksData = { tracks: {new: [], heard: []}, meta: { totalTracks: 0, newTracks: 0 } }
 
 class App extends Component {
   constructor(props) {
@@ -67,7 +67,7 @@ class App extends Component {
         path: `/tracks`
       })
 
-    this.setState({ tracksData: { tracks: tracks.slice(0, 500), meta: { newTracks, totalTracks } } })
+    this.setState({ tracksData: { tracks, meta: { newTracks, totalTracks } } })
   }
 
   async markAllHeard() {
