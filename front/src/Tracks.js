@@ -238,19 +238,19 @@ class Tracks extends Component {
       <div style={{display: 'flex', alignItems: 'center', color: 'white'}}>
         <div style={{height: '100%', flex: 1, padding: 4}}>
           <SpinnerButton
-            size={'large'}
+            size={'small'}
             loading={this.state.markingHeard}
             onClick={async () => {
               this.setState({markingHeard: true})
               await this.props.onMarkAllHeardClicked()
               this.setState({markingHeard: false})
             }}
-            style={{margin: 2, height: '100%', width: 300, margin: 4}}
+            style={{margin: 2, height: '100%', width: 150, margin: 4}}
             label={'Mark all heard'}
             loadingLabel={'Marking all heard'}
             />
           <SpinnerButton
-            size={'large'}
+            size={'small'}
             loading={this.state.updatingTracks}
             onClick={async () => {
               this.setState({updatingTracks: true})
@@ -260,7 +260,7 @@ class Tracks extends Component {
                 this.setState({updatingTracks: false})
               }
             }}
-            style={{margin: 2, height: '100%', width: 300, margin: 4}}
+            style={{margin: 2, height: '100%', width: 150, margin: 4}}
             label={'Update list'}
             loadingLabel={'Updating list'}
             />
@@ -298,7 +298,7 @@ class Tracks extends Component {
         </tr>
         </thead>
         {/* Replace the calc below. Currently it is calculated as height of preview + height of status bar + height of table header + height of the button row at the end of the table */}
-        <tbody style={{ height: "calc(100% - 279px)", overflow: "scroll", display: "block" }}>
+        <tbody style={{ height: "calc(100% - 166px)", overflow: "scroll", display: "block" }}>
         {
           this.renderTracks(this.props.tracks, this.props.carts)
         }

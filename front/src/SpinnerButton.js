@@ -18,7 +18,7 @@ class SpinnerButton extends Component {
         this.props.loading ?
           <>
             {this.props.loadingLabel}
-            <div className='loading-indicator'><div></div><div></div><div></div><div></div></div>
+            <div className={`loading-indicator loading-indicator__${this.props.size}`}><div></div><div></div><div></div><div></div></div>
           </> :
           this.props.label
       }
