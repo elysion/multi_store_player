@@ -10,7 +10,7 @@ class Player extends Component {
 
     this.state = {
       currentTrack: null,
-      heardTracks: props.tracks.heard,
+      heardTracks: [],
       listenedTracks: 0,
       listState: 'new'
     }
@@ -137,21 +137,28 @@ class Player extends Component {
   }
 
   getTracks() {
+    const heardTracks = this.state.heardTracks
     let tracks
-    if (this.state.listState === 'new') {
-      let tracks = this.props.tracks.new.slice()
 
-      this.state.heardTracks.forEach(heardTrack => {
+    if (this.state.listState === 'new') {
+      tracks = this.props.tracks.new.slice()
+      heardTracks.forEach(heardTrack => {
         const index = tracks.findIndex(R.propEq('id', parseInt(heardTrack.id, 10)))
         if (index !== -1) {
           tracks[index] = heardTrack
         }
       })
-
-      return tracks
     } else {
-      tracks = this.state.heardTracks
+      tracks = this.props.tracks.heard.slice()
+      heardTracks.forEach(heardTrack => {
+        const index = tracks.findIndex(R.propEq('id', parseInt(heardTrack.id, 10)))
+        if (index !== -1) {
+          tracks.splice(index, 1)
+        }
+      })
+      tracks = this.state.heardTracks.concat(tracks)
     }
+
     return tracks
   }
 
