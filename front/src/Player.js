@@ -65,7 +65,7 @@ class Player extends Component {
     }
 
     let updatedHeardTracks = this.state.heardTracks
-    const updatedTrack = R.assoc('heard', true, this.getTracks().find(R.propEq('id', trackId)))
+    const updatedTrack = R.assoc('heard', true, this.props.tracks.new.find(R.propEq('id', trackId)))
     const playedTrackIndex = this.state.heardTracks.findIndex(R.propEq('id', trackId))
     if (playedTrackIndex !== -1) {
       updatedHeardTracks.splice(playedTrackIndex, 1)
