@@ -139,7 +139,7 @@ class Player extends Component {
   getTracks() {
     let tracks
     if (this.state.listState === 'new') {
-      let tracks = this.props.tracks.new
+      let tracks = this.props.tracks.new.slice()
 
       this.state.heardTracks.forEach(heardTrack => {
         const index = tracks.findIndex(R.propEq('id', parseInt(heardTrack.id, 10)))
