@@ -266,11 +266,11 @@ class Tracks extends Component {
             />
             <div className='state-select-button--container'>
               <input type='radio' id='tracklist-state-new' name='tracklist-state' className='state-select-button--button' defaultChecked={this.props.listState === 'new'} onChange={this.props.onShowNewClicked}/>
-              <label className='state-select-button--button' for='tracklist-state-new'>
+              <label className='state-select-button--button' htmlFor='tracklist-state-new'>
                 New tracks
               </label>
               <input type='radio' id='tracklist-state-heard' name='tracklist-state' className='state-select-button--button' defaultChecked={this.props.listState === 'heard'} onChange={this.props.onShowHeardClicked}/>
-              <label className='state-select-button--button' for='tracklist-state-heard'>
+              <label className='state-select-button--button' htmlFor='tracklist-state-heard'>
                 Recently played
               </label>
             </div>
