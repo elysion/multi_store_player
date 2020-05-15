@@ -63,7 +63,7 @@ class Track extends Component {
     super(props)
     this.state = {
       cartButtonDisabled: false,
-      ignoreArtistsByLabelDisabled: false,
+      ignoreArtistsByLabelsDisabled: false,
       heardHover: false
     }
   }
@@ -168,9 +168,10 @@ class Track extends Component {
           this.props.label ?
         <PillButton
           className={'table-cell-button'}
+          disabled={this.state.ignoreArtistsByLabelsDisabled}
           onClick={() => {
-            this.setState({ ignoreArtistsByLabelDisabled: true })
-            this.props.onIgnoreArtistsByLabel()
+            this.setState({ ignoreArtistsByLabelsDisabled: true })
+            this.props.onIgnoreArtistsByLabels()
           }}
         >
           by label
@@ -195,14 +196,14 @@ class Tracks extends Component {
   }
 
   renderTracks(tracks, carts) {
-    return tracks.map(({ id, title, artists, remixers, label, heard, stores }) => {
+    return tracks.map(({ id, title, artists, remixers, labels, heard, stores }) => {
       // if (!R.isEmpty(carts)) debugger
       return <Track
         id={id}
         title={title}
         artists={artists}
         remixers={remixers}
-        label={label.name}
+        label={R.pluck('name', labels).join(', ')}
         stores={stores}
         selected={this.state.selectedTrack === id}
         playing={this.props.currentTrack === id}
@@ -223,12 +224,11 @@ class Tracks extends Component {
         // }}
         onAddToCart={this.props.onAddToCart}
         onRemoveFromCart={this.props.onRemoveFromCart}
-        onIgnoreArtistsByLabel={() => this.props.onIgnoreArtistsByLabel(
-          artists.map(artist => ({
-            artistId: artist.id,
-            labelId: label.id
-          }))
-        )}
+        onIgnoreArtistsByLabels={() => this.props.onIgnoreArtistsByLabels({
+            artistIds: artists.map(R.prop('id')),
+            labelIds: labels.map(R.prop('id'))
+          })
+        }
       />
     })
   }

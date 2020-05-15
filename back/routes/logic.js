@@ -1,6 +1,7 @@
 const BPromise = require('bluebird')
 const pg = require('../db/pg.js')
 const {apiRoot} = require('../config.js')
+const R = require('ramda')
 
 const removeIgnoredTracksFromUser = require('../remove-ignored-tracks-from-user.js')
 const { queryUserTracks, addArtistOnLabelToIgnore, setTrackHeard, setAllHeard, getLongestPreviewForTrack } =
@@ -23,9 +24,9 @@ module.exports.setTrackHeard = setTrackHeard
 module.exports.setAllHeard = setAllHeard
 
 module.exports.addArtistOnLabelToIgnore = addArtistOnLabelToIgnore
-module.exports.addArtistsOnLabelsToIgnore = (username, artistsAndLabels) =>
+module.exports.addArtistsOnLabelsToIgnore = (username, { artistIds, labelIds }) =>
   BPromise.using(pg.getTransaction(), tx =>
-    BPromise.each(artistsAndLabels, ({ artistId, labelId }) =>
+    BPromise.each(R.xprod(artistIds, labelIds), ([ artistId, labelId ]) =>
       addArtistOnLabelToIgnore(tx, artistId, labelId, username).tap(() => removeIgnoredTracksFromUser(tx, username))
     )
   )

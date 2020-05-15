@@ -124,8 +124,8 @@ class Player extends Component {
     this.jumpTracks(firstUnplayed - this.getCurrentTrackIndex())
   }
 
-  async ignoreArtistsByLabel(artistsAndLabels) {
-    await requestJSONwithCredentials({
+  async ignoreArtistsByLabels(artistsAndLabels) {
+    await requestWithCredentials({
       path: `/ignore/label`,
       method: 'POST',
       body: artistsAndLabels
@@ -184,7 +184,7 @@ class Player extends Component {
         onUpdateTracksClicked={this.props.onUpdateTracksClicked}
         onAddToCart={this.addToCart}
         onRemoveFromCart={this.removeFromCart}
-        onIgnoreArtistsByLabel={this.ignoreArtistsByLabel}
+        onIgnoreArtistsByLabels={this.ignoreArtistsByLabels}
         onPreviewRequested={id => {
           const requestedTrack = R.find(R.propEq('id', id), this.getTracks())
           this.setCurrentTrack(requestedTrack)

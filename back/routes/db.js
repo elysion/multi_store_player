@@ -1,23 +1,27 @@
 const pg = require('../db/pg.js')
-const SQL = require('sql-template-strings')
+const sql = require('sql-template-strings')
 const R = require('ramda')
 
 module.exports.queryUserTracks = username =>
   pg.queryRowsAsync(
     // language=PostgreSQL
-    SQL`WITH
+    sql`WITH
     logged_user AS (
       SELECT meta_account_user_id
       FROM meta_account
       WHERE meta_account_username = ${username}
   ),
-    user_tracks AS (
+  user_tracks_meta AS (
+    SELECT
+      COUNT(*) as total,
+      COUNT(*) FILTER (WHERE user__track_heard IS NULL) as new
+    FROM user__track
+    NATURAL JOIN logged_user
+  ),
+    new_tracks AS (
       SELECT
         track_id,
-        track_title,
         user__track_heard,
-        track_added,
-        track_duration_ms,
         SUM(COALESCE(user_label_scores_score, 0)) + SUM(COALESCE(user_artist_scores_score, 0)) AS score
       FROM logged_user
         NATURAL JOIN user__track
@@ -26,39 +30,52 @@ module.exports.queryUserTracks = username =>
         NATURAL LEFT JOIN track__label
         NATURAL LEFT JOIN user_label_scores
         NATURAL LEFT JOIN user_artist_scores
-      GROUP BY 1, 2, 3, 4, 5
+      WHERE user__track_heard IS NULL
+      GROUP BY 1, 2
+      ORDER BY score DESC
+      LIMIT 200
   ),
-  user_tracks_meta AS (
+  heard_tracks AS (
     SELECT
-      COUNT(*) as total,
-      COUNT(*) FILTER (WHERE user__track_heard IS NULL) as new
-    FROM user_tracks
+      track_id,
+      user__track_heard,
+      NULL :: NUMERIC AS score
+    FROM user__track
+    NATURAL JOIN logged_user
+    WHERE user__track_heard IS NOT NULL
+    ORDER BY user__track_heard DESC
+    LIMIT 50
+  ),
+  limited_tracks AS (
+    SELECT track_id, user__track_heard, score FROM new_tracks
+    UNION ALL
+    SELECT track_id, user__track_heard, score FROM heard_tracks
   ),
     authors AS (
       SELECT
-        ut.track_id,
+        lt.track_id,
         json_agg(
             json_build_object('name', a.artist_name, 'id', a.artist_id)
         ) AS authors
-      FROM user_tracks ut
-        JOIN track__artist ta ON (ta.track_id = ut.track_id AND ta.track__artist_role = 'author')
+      FROM limited_tracks lt
+        JOIN track__artist ta ON (ta.track_id = lt.track_id AND ta.track__artist_role = 'author')
         JOIN artist a ON (a.artist_id = ta.artist_id)
       GROUP BY 1
   ),
     remixers AS (
       SELECT
-        ut.track_id,
+        lt.track_id,
         json_agg(
             json_build_object('name', a.artist_name, 'id', a.artist_id)
         ) AS remixers
-      FROM user_tracks ut
-        JOIN track__artist ta ON (ta.track_id = ut.track_id AND ta.track__artist_role = 'remixer')
+      FROM limited_tracks lt
+        JOIN track__artist ta ON (ta.track_id = lt.track_id AND ta.track__artist_role = 'remixer')
         JOIN artist a ON (a.artist_id = ta.artist_id)
       GROUP BY 1
   ),
     previews AS (
       SELECT
-        ut.track_id,
+        lt.track_id,
         json_agg(
           json_build_object(
             'format', store__track_preview_format,
@@ -69,14 +86,14 @@ module.exports.queryUserTracks = username =>
           )
           ORDER BY store__track_preview_end_ms - store__track_preview_start_ms DESC
         ) AS previews
-      FROM user_tracks ut
+      FROM limited_tracks lt
         NATURAL JOIN store__track
         NATURAL JOIN store__track_preview
         NATURAL LEFT JOIN store__track_preview_waveform
       GROUP BY 1
   ),
   store_tracks AS (
-      SELECT distinct on (ut.track_id, store_id)
+      SELECT distinct on (lt.track_id, store_id)
         track_id,
         store_id,
         store__track_id,
@@ -84,7 +101,7 @@ module.exports.queryUserTracks = username =>
         store_name,
         store__track_store_id,
         store__release_url
-      FROM user_tracks ut
+      FROM limited_tracks lt
         NATURAL JOIN store__track
         NATURAL JOIN store
         NATURAL LEFT JOIN release__track
@@ -107,42 +124,49 @@ module.exports.queryUserTracks = username =>
       FROM store_tracks
       GROUP BY 1
   ),
-  tracks AS (
+  labels AS (
+    SELECT
+        track_id,
+        json_agg(json_build_object('name', label_name, 'id', label_id)) AS labels
+      FROM limited_tracks
+      NATURAL JOIN track__label
+      NATURAL JOIN label
+      GROUP BY 1
+  ),
+  tracks_with_details AS (
 SELECT
-  ut.track_id           AS id,
+  lt.track_id           AS id,
   track_title           AS title,
   user__track_heard     AS heard,
   track_duration_ms     AS duration,
   track_added           AS added,
-  json_build_object(
-      'name', label_name,
-      'id', label_id
-  )                 AS label,
-  authors.authors   AS artists,
+  authors.authors       AS artists,
+  CASE WHEN labels.labels IS NULL
+    THEN '[]' :: JSON
+  ELSE labels.labels END AS labels,
   CASE WHEN remixers.remixers IS NULL
     THEN '[]' :: JSON
-  ELSE remixers.remixers END,
+  ELSE remixers.remixers END AS remixers,
   previews.previews as previews,
   stores.stores,
   stores.release_date AS released,
   score
-
-FROM user_tracks ut
-  NATURAL LEFT JOIN track__label
-  NATURAL LEFT JOIN label
+FROM limited_tracks lt
+  NATURAL JOIN track
   NATURAL JOIN authors
-  NATURAL LEFT JOIN remixers
   NATURAL JOIN previews
   NATURAL JOIN stores
+  NATURAL JOIN labels
+  NATURAL LEFT JOIN remixers
   ),
-  new_tracks AS (
-    SELECT json_agg(t) as new_tracks FROM (
-      SELECT * FROM tracks WHERE heard IS NULL ORDER BY score DESC, added DESC, id LIMIT 500
+  new_tracks_with_details AS (
+    SELECT json_agg(t) AS new_tracks FROM (
+      SELECT * FROM tracks_with_details WHERE heard IS NULL ORDER BY score DESC, added DESC
     ) t
   ),
-  heard_tracks AS (
-    SELECT json_agg(t) as heard_tracks FROM (
-      SELECT * FROM tracks WHERE heard IS NOT NULL  ORDER BY heard DESC LIMIT 100
+  heard_tracks_with_details AS (
+    SELECT json_agg(t) AS heard_tracks FROM (
+      SELECT * FROM tracks_with_details WHERE heard IS NOT NULL ORDER BY heard DESC
     ) t
   )
   SELECT
@@ -155,15 +179,15 @@ FROM user_tracks ut
       'new', new
     ) as meta
   FROM
-    new_tracks,
-    heard_tracks,
+    new_tracks_with_details,
+    heard_tracks_with_details,
     user_tracks_meta
 `).then(R.head)
 
 module.exports.addArtistOnLabelToIgnore = (tx, artistId, labelId, username) =>
   tx.queryAsync(
     // language=PostgreSQL
-    SQL`
+    sql`
 INSERT INTO user__artist__label_ignore
 (meta_account_user_id, artist_id, label_id)
 SELECT
@@ -178,7 +202,7 @@ ON CONFLICT ON CONSTRAINT user__artist__label_ignore_unique DO NOTHING
 
 module.exports.setTrackHeard = (trackId, username, heard) =>
   pg.queryRowsAsync(
-    SQL`
+    sql`
 UPDATE user__track
 SET user__track_heard = ${heard ? 'now()' : null}
 WHERE
@@ -189,7 +213,7 @@ WHERE
 
 module.exports.setAllHeard = (username, heard) =>
   pg.queryAsync(
-    SQL`
+    sql`
 UPDATE user__track
 SET user__track_heard = ${heard ? 'NOW()' : null}
 WHERE
@@ -199,7 +223,7 @@ WHERE
 
 module.exports.getLongestPreviewForTrack = (id, format) =>
   pg.queryRowsAsync(
-    SQL`
+    sql`
     SELECT store__track_id AS "storeTrackId" , lower(store_name) AS "storeCode"
     FROM
       store__track_preview NATURAL JOIN
