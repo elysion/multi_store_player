@@ -1,11 +1,10 @@
 const L = require('partial.lenses')
 const R = require('ramda')
 const { using } = require('bluebird')
-const pg = require('../../db/pg.js')
+const { initDb, pg } = require('../../lib/db.js')
 
-const db = require('../include/db.js')
 const track = require('./fixtures/hoogs_track.json')
-const bpLogic = require('../../routes/stores/beatport/logic.js')
+const bpLogic = require('../../../routes/stores/beatport/logic.js')
 const modifiedTrack = L.modify(L.seq(['id'], ['release', 'id']), R.inc, track)
 const remixedTrack = R.pipe(
   L.modify(L.seq(['id'], ['release', 'id']), R.inc),
@@ -25,12 +24,12 @@ const editOfRemixedTrack = R.pipe(
   L.set('mix', 'Edit')
 )(remixedTrack)
 const assert = require('assert')
-const { test } = require('../lib/test.js')
+const { test } = require('../../lib/test.js')
 
 test({
   'when duplicate artists are added': {
     setup: async () => {
-      await db.initDb()
+      await initDb()
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [track]))
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [modifiedTrack]))
     },
@@ -44,7 +43,7 @@ test({
   },
   'when remixed track is added': {
     setup: async () => {
-      await db.initDb()
+      await initDb()
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [remixedTrack]))
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [track]))
     },
@@ -53,12 +52,12 @@ test({
       assert.equal(trackCount, 2)
     },
     teardown: async () => {
-      // await db.initDb()
+      // await initDb()
     }
   },
   'when an edit of remixed track is added': {
     setup: async () => {
-      await db.initDb()
+      await initDb()
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [remixedTrack]))
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [editOfRemixedTrack]))
     },

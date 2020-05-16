@@ -1,20 +1,19 @@
 const L = require('partial.lenses')
 const R = require('ramda')
 const { using } = require('bluebird')
-const pg = require('../../db/pg.js')
+const { initDb, pg } = require('../../lib/db.js')
 
-const db = require('../include/db.js')
 const firstTrack = require('./fixtures/hoogs_track.json')
 const secondTrack = require('./fixtures/another_hoogs_track.json')
-const bpLogic = require('../../routes/stores/beatport/logic.js')
+const bpLogic = require('../../../routes/stores/beatport/logic.js')
 const tracks = [firstTrack, secondTrack]
 const assert = require('assert')
-const { test } = require('../lib/test.js')
+const { test } = require('../../lib/test.js')
 
 test({
   'when duplicate artists are added': {
     setup: async () => {
-      await db.initDb()
+      await initDb()
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, tracks))
     },
     'only one artist is added to db': async () => {
