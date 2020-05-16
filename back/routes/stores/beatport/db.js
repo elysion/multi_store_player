@@ -158,7 +158,7 @@ module.exports.insertNewTrackReturningTrackId = (tx, newStoreTrack) =>
       FROM exiting_track_details
       WHERE
         track_title = ${newStoreTrack.name} AND
-        (track_mix IS NULL OR track_mix = ${newStoreTrack.mix}) AND
+        (track_mix IS NULL OR LOWER(track_mix) = LOWER(${newStoreTrack.mix})) AND
         artists = (SELECT ARRAY(SELECT artist_id
                                 FROM authors
                                 ORDER BY artist_id))
