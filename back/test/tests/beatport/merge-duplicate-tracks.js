@@ -27,7 +27,7 @@ const assert = require('assert')
 const { test } = require('../../lib/test.js')
 
 test({
-  'when duplicate artists are added': {
+  'when duplicate tracks are added': {
     setup: async () => {
       await initDb()
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [track]))
@@ -47,7 +47,7 @@ test({
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [remixedTrack]))
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [track]))
     },
-    'only one track is added to db': async () => {
+    'only both tracks are added to db': async () => {
       const { trackCount } = (await pg.queryAsync('select count(*) as "trackCount" from track'))[0]
       assert.equal(trackCount, 2)
     },
@@ -61,7 +61,7 @@ test({
       await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [remixedTrack]))
       return await using(pg.getTransaction(), tx => bpLogic.test.insertNewTracksToDb(tx, [editOfRemixedTrack]))
     },
-    'only one track is added to db': async () => {
+    'only both tracks are added to db': async () => {
       const { trackCount } = (await pg.queryAsync('select count(*) as "trackCount" from track'))[0]
       assert.equal(trackCount, 2)
     },
