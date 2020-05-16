@@ -123,7 +123,7 @@ class Track extends Component {
         }
       </td>
       <td style={{ flex: 3, overflow: 'hidden' }}>
-        {this.props.title}
+        {this.props.title} {this.props.mix ? `(${this.props.mix})` : ''}
       </td>
       <td style={{ flex: 2, overflow: 'hidden' }}>
         {
@@ -196,12 +196,13 @@ class Tracks extends Component {
   }
 
   renderTracks(tracks, carts) {
-    return tracks.map(({ id, title, artists, remixers, labels, heard, stores }) => {
+    return tracks.map(({ id, title, mix, artists, remixers, labels, heard, stores }) => {
       // if (!R.isEmpty(carts)) debugger
       return <Track
         id={id}
         title={title}
         artists={artists}
+        mix={mix}
         remixers={remixers}
         label={R.pluck('name', labels).join(', ')}
         stores={stores}

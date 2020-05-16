@@ -141,6 +141,7 @@ SELECT
   track_duration_ms     AS duration,
   track_added           AS added,
   authors.authors       AS artists,
+  track_mix             AS mix,
   CASE WHEN labels.labels IS NULL
     THEN '[]' :: JSON
   ELSE labels.labels END AS labels,
