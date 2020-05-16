@@ -156,7 +156,7 @@ FROM limited_tracks lt
   NATURAL JOIN authors
   NATURAL JOIN previews
   NATURAL JOIN stores
-  NATURAL JOIN labels
+  NATURAL LEFT JOIN labels
   NATURAL LEFT JOIN remixers
   ),
   new_tracks_with_details AS (
