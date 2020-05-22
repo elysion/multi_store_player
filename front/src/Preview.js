@@ -39,6 +39,10 @@ class Preview extends Component {
     }
   }
 
+  trackTitle(track) {
+    return track ? `${track.title} ${track.mix ? `(${track.mix})` : ''}` : ''
+  }
+
   render() {
     const menu = <button style={{ position: 'absolute', margin: 10, color: 'white' }} onClick={() => this.props.onMenuClicked()}>
       <FontAwesome name='bars' /> {this.props.showHint ? <><FontAwesome name='long-arrow-left' />&nbsp;Start here!</> : ''}
@@ -57,7 +61,7 @@ class Preview extends Component {
     return <div className='preview'>
       {menu}
       <TrackTitle className="preview-title" artists={(this.props.currentTrack || { artists: [] }).artists}
-        title={(this.props.currentTrack || {}).title} />
+        title={this.trackTitle(this.props.currentTrack)} />
       <div className='player-wrapper'>
         <button className='button button__light button-playback' onClick={() => this.props.onPrevious()}>
           <FontAwesome name='step-backward' />
