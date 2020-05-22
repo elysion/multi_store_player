@@ -1,7 +1,7 @@
 "use strict"
 
 const BPromise = require('bluebird')
-const SQL = require('sql-template-strings')
+const sql =require('sql-template-strings')
 const pgrm = require('./pg.js')
 const using = BPromise.using
 
@@ -10,7 +10,7 @@ module.exports = {
     using(pgrm.getConnection(), connection =>
       connection.queryAsync(
         //language=PostgreSQL
-        SQL`SELECT 1
+        sql`SELECT 1
 FROM meta_account
 WHERE meta_account_username = lower(${username}) AND
       meta_account_passwd = crypt(${password}, meta_account_passwd)`)
@@ -18,7 +18,7 @@ WHERE meta_account_username = lower(${username}) AND
     ),
   findByUsername: username =>
     //language=PostgreSQL
-    pgrm.queryRowsAsync(SQL`
+    pgrm.queryRowsAsync(sql`
       SELECT
         meta_account_username AS username,
         meta_account_details  AS details
