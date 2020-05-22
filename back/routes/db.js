@@ -22,7 +22,7 @@ module.exports.queryUserTracks = username =>
       SELECT
         track_id,
         user__track_heard,
-        SUM(COALESCE(user_label_scores_score, 0)) + SUM(COALESCE(user_artist_scores_score, 0)) AS score
+        SUM(COALESCE(user_label_scores_score, 0)) + 5 * SUM(COALESCE(user_artist_scores_score, 0)) AS score
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
