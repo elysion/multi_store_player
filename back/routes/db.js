@@ -18,22 +18,45 @@ module.exports.queryUserTracks = username =>
     FROM user__track
     NATURAL JOIN logged_user
   ),
-    new_tracks AS (
+  new_tracks AS (
       SELECT
         track_id,
-        user__track_heard,
-        SUM(COALESCE(user_label_scores_score, 0)) + 5 * SUM(COALESCE(user_artist_scores_score, 0)) AS score
+        track_added,
+        user__track_heard
       FROM logged_user
         NATURAL JOIN user__track
         NATURAL JOIN track
-        NATURAL JOIN track__artist
-        NATURAL LEFT JOIN track__label
-        NATURAL LEFT JOIN user_label_scores
-        NATURAL LEFT JOIN user_artist_scores
       WHERE user__track_heard IS NULL
-      GROUP BY 1, track_added, 2
-      ORDER BY score DESC, track_added DESC
-      LIMIT 200
+      GROUP BY 1, 2, 3
+  ),
+  label_scores AS (
+    SELECT
+      track_id,
+      SUM(COALESCE(user_label_scores_score, 0)) AS label_score
+    FROM new_tracks
+    NATURAL LEFT JOIN track__label
+    NATURAL LEFT JOIN user_label_scores
+    GROUP BY 1
+  ),
+  artist_scores AS (
+    SELECT
+      track_id,
+      SUM(COALESCE(user_artist_scores_score, 0)) AS artist_score
+    FROM new_tracks
+    NATURAL JOIN track__artist
+    NATURAL LEFT JOIN user_artist_scores
+    GROUP BY 1
+  ),
+  new_tracks_with_scores AS (
+    SELECT
+      track_id,
+      user__track_heard,
+      label_score + 5 * artist_score AS score
+    FROM new_tracks
+    NATURAL JOIN label_scores
+    NATURAL JOIN artist_scores
+    ORDER BY score DESC, track_added DESC
+    LIMIT 200
   ),
   heard_tracks AS (
     SELECT
@@ -47,7 +70,7 @@ module.exports.queryUserTracks = username =>
     LIMIT 50
   ),
   limited_tracks AS (
-    SELECT track_id, user__track_heard, score FROM new_tracks
+    SELECT track_id, user__track_heard, score FROM new_tracks_with_scores
     UNION ALL
     SELECT track_id, user__track_heard, score FROM heard_tracks
   ),
