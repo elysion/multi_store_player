@@ -31,8 +31,8 @@ module.exports.queryUserTracks = username =>
         NATURAL LEFT JOIN user_label_scores
         NATURAL LEFT JOIN user_artist_scores
       WHERE user__track_heard IS NULL
-      GROUP BY 1, 2
-      ORDER BY score DESC
+      GROUP BY 1, track_added, 2
+      ORDER BY score DESC, track_added DESC
       LIMIT 200
   ),
   heard_tracks AS (
