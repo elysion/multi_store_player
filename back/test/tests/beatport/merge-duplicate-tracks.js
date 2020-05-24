@@ -3,7 +3,7 @@ const R = require('ramda')
 const { using } = require('bluebird')
 const { initDb, pg } = require('../../lib/db.js')
 
-const track = require('./fixtures/hoogs_track.json')
+const track = require('../../fixtures/hoogs_track.json')
 const bpLogic = require('../../../routes/stores/beatport/logic.js')
 const modifiedTrack = L.modify(L.seq(['id'], ['release', 'id']), R.inc, track)
 const remixedTrack = R.pipe(

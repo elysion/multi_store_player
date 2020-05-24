@@ -3,7 +3,7 @@ const R = require('ramda')
 const { using } = require('bluebird')
 const { initDb, pg } = require('../../lib/db.js')
 
-const tracks = require('./fixtures/track_and_remix.json')
+const tracks = require('../../fixtures/track_and_remix.json')
 const bpLogic = require('../../../routes/stores/beatport/logic.js')
 const assert = require('assert')
 const { test } = require('../../lib/test.js')

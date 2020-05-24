@@ -2,6 +2,7 @@ const router = require('express').Router()
 const bodyParser = require('body-parser')
 const bpApi = require('bp-api')
 const { log, error } = require('./logger')
+const cors = require('cors')
 
 const {
   getSessionForRequest,
@@ -11,7 +12,9 @@ const {
   getSession,
   setSession,
   deleteSession,
-  getPreviewUrl
+  getPreviewUrl,
+  addNewTracksToUser,
+  insertDownloadedTracksToUser
 } = require('./logic.js')
 
 router.get('/download/:downloadId', (req, res, next) => {
@@ -20,6 +23,27 @@ router.get('/download/:downloadId', (req, res, next) => {
     .downloadTrackWithIdAsync(downloadId)
     .tap(request => req.pipe(request).pipe(res))
     .catch(next)
+})
+
+router.use(bodyParser.text({ limit: '1mb' }))
+
+router.post('/tracks', cors({
+  origin: 'https://www.beatport.com'
+}), async ({ body, user }, res, next) => {
+  const tracks = JSON.parse(body)
+  user = 'testuser'
+  try {
+    if (tracks.new) {
+      await addNewTracksToUser(user, tracks.new)
+    } else if (tracks.downloaded) {
+      await insertDownloadedTracksToUser(user, tracks.downloaded)
+    } else {
+      throw new Error('Unsupported tracks object received')
+    }
+    res.status(204).send()
+  } catch (e) {
+    next(e)
+  }
 })
 
 router.use(bodyParser.json())
